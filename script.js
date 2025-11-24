@@ -1,227 +1,120 @@
 // ============================
 //   LA MORT EST DANS LE PRÉ
 //   Grille 4 x 3 (12 cases)
-//   - PAS de vérification de bingo
-//   - 11 images aléatoires
-//   - 1 image fixe au "centre"
+//   - PAS de seed
+//   - PAS de partage
+//   - 11 images random + 1 image fixe au centre
+//   - La carte se génère au clic sur le bouton
 // ============================
 
-console.log("script-mort-pre chargé");
+console.log("script Mort Est Dans Le Pré chargé");
 
 // --- CONFIG ---
 
-// 3 lignes, 4 colonnes => 12 cases
 const GRID_ROWS = 4;
 const GRID_COLS = 3;
-const TOTAL_CELLS = GRID_ROWS * GRID_COLS; // 12
+// 4 x 3 = 12 cases, dont 1 au centre => 11 images dans ListeImages
 
-// Case "centrale" (0 = première ligne/colonne)
-// Ici : 2e ligne, 2e colonne (visuellement au milieu)
+// Case "centrale" (2e ligne, 2e colonne : index 1,1)
 const CENTER_ROW = 1;
 const CENTER_COL = 1;
 
-// On encode uniquement les 11 cases NON centrales dans la seed
-const SEED_LENGTH = 11 * 2; // 22 caractères
-
-// ============================
-//   LISTE DES IMAGES
-// ============================
-
-// 11 images aléatoires (les cases NON centrales)
+// 11 images pour toutes les cases SAUF le centre
+// ➜ vérifie que les noms correspondent EXACTEMENT à tes fichiers dans /images
 const ListeImages = [
-  { id: 1, name: "Banshee.webp" },
+  { id: 1, name: "Fantome.webp" },
   { id: 2, name: "Démon.webp" },
-  { id: 3, name: "Djinn.webp" },
-  { id: 4, name: "Esprit.webp" },
-  { id: 5, name: "Goryo.webp" },
-  { id: 6, name: "Oni.webp" },
-  { id: 7, name: "Polter.webp" },
-  { id: 8, name: "Revenant.webp" },
-  { id: 9, name: "Thaye.webp" },
-  { id: 10, name: "Yokai.webp" },
-  { id: 11, name: "Hantu.webp" },
-  { id: 12, name: "Spectre.webp" },
-  { id: 13, name: "Fantome.webp" },
-  { id: 14, name: "Ombre.webp" },
-  { id: 15, name: "Yurei.webp" },
-  { id: 16, name: "Cauchemar.webp" },
-  { id: 17, name: "Deogen.webp" },
-  { id: 18, name: "Jumeaux.webp" },
-  { id: 19, name: "Mimic.webp" },
-  { id: 20, name: "Moroi.webp" },
-  { id: 21, name: "Myling.webp" },
-  { id: 22, name: "Obake.webp" },
-  { id: 23, name: "Onryo.webp" },
-  { id: 24, name: "Raiju.webp" },
-  // Ajoutez le reste des images ici
+  { id: 3, name: "Jumeaux.webp" },
+  { id: 4, name: "Djinn.webp" },
+  { id: 5, name: "Yurei.webp" },
+  { id: 6, name: "Moroi.webp" },
+  { id: 7, name: "Goryo.webp" },
+  { id: 8, name: "Mimic.webp" },
+  { id: 9, name: "Banshee.webp" },
+  { id: 10, name: "Moroi.webp" },
+  { id: 11, name: "Revenant.webp" },
 ];
 
-// Image FIXE au centre (12e image)
+// Image FIXE au centre
 const centerImage = {
-  id: 99,                // id arbitraire, pas utilisé dans la seed
-  name: "Logo_Mort.png" // ➜ Remplace par le nom EXACT du fichier de l'image centrale
+  name: "Logo_Mort.png", // ➜ fichier pour la case centrale
 };
 
 // ============================
 //       GÉNÉRATION CARTE
 // ============================
 
-function genererNouvelleCarte(images) {
-  console.log("genererNouvelleCarte appelée, images param =", images);
-
-  if (images === undefined) {
-    // Mélanger les 11 images non centrales
-    images = shuffle(ListeImages);
-    let seed = "";
-    for (const image of images) {
-      const idStr = image.id.toString().padStart(2, "0");
-      seed += idStr;
-    }
-
-    // Seed = 22 caractères (11 images * 2 chiffres)
-    seed = seed.substring(0, SEED_LENGTH);
-    const url = "?seed=" + seed;
-    window.history.pushState({ path: url }, "", url);
-    console.log("Seed générée:", seed, "URL:", url);
-
-    // Afficher le bouton de partage
-    document.getElementById("boutonPartager").style.display = "block";
-  }
+function genererNouvelleCarte() {
+  console.log("Génération de la carte...");
 
   const table = document.getElementById("carte");
-  console.log("Carte 4x3 générée");
+  const imagesFolder = "images/";
 
+  if (!table) {
+    console.error("Table #carte introuvable dans le HTML");
+    return;
+  }
+
+  // Vider la grille si elle existait déjà
   table.innerHTML = "";
 
-  const imagesFolder = "images/";
-  let count = 0;
+  // On crée une copie mélangée de la liste d'images
+  const imagesMelangees = shuffle([...ListeImages]);
+
+  let indexImage = 0;
 
   for (let i = 0; i < GRID_ROWS; i++) {
     const row = table.insertRow(i);
+
     for (let j = 0; j < GRID_COLS; j++) {
       const cell = row.insertCell(j);
 
       const img = document.createElement("img");
 
-      // Si on est sur la case centrale -> image fixe
+      // Case centrale : image fixe
       if (i === CENTER_ROW && j === CENTER_COL) {
         img.src = imagesFolder + centerImage.name;
         img.alt = "Image centre";
       } else {
-        // Sinon -> on prend la prochaine image aléatoire dans la liste
-        img.src = imagesFolder + images[count].name;
-        img.alt = "Image " + (count + 1);
-        count++;
+        // Toutes les autres cases : on parcourt la liste mélangée
+        const imageData = imagesMelangees[indexImage];
+        if (!imageData) {
+          console.warn("Pas assez d'images dans ListeImages pour remplir la grille");
+          continue;
+        }
+        img.src = imagesFolder + imageData.name;
+        img.alt = "Image " + imageData.id;
+        indexImage++;
       }
 
       const overlay = document.createElement("div");
       overlay.className = "overlay";
 
       const logo = document.createElement("img");
-      logo.src = "images/Valide.webp";
-      logo.alt = "Valide";
+      logo.src = "images/Bingo_confirme.webp";
+      logo.alt = "Bingo_confirme";
       logo.className = "logo";
 
       overlay.appendChild(logo);
       cell.appendChild(img);
       cell.appendChild(overlay);
 
-      // Clic = toggle + son (PAS de vérif bingo)
+      // Clic = coche/décoche + son
       cell.addEventListener("click", function () {
         toggleSelected(this);
       });
     }
   }
-}
 
-// ============================
-//         SEED / URL
-// ============================
-
-function ControlSeedURL() {
-  const paramsString = window.location.search;
-  const searchParams = new URLSearchParams(paramsString);
-  if (searchParams.has("seed") === true) {
-    const seed = searchParams.get("seed");
-    console.log("Seed trouvée dans l'URL:", seed);
-    if (seed.length == SEED_LENGTH) {
-      CutSeed(seed);
-    } else {
-      alert("Mauvais format de seed");
-    }
-  }
-}
-
-function doublon(tableau) {
-  const tableauunique = Array.from(new Set(tableau));
-  return tableau.length !== tableauunique.length;
-}
-
-// Découpe le seed -> reconstruit la liste des 11 images non centrales
-function CutSeed(seed) {
-  const ListeImagesGenerees = [];
-  const tableidimages = seed.match(/.{1,2}/g);
-
-  for (const id of tableidimages) {
-    for (const image of ListeImages) {
-      if (image.id == id) {
-        ListeImagesGenerees.push(image);
-      }
-    }
-  }
-
-  if (doublon(ListeImagesGenerees)) {
-    alert("Mauvais format de seed");
-  } else {
-    if (ListeImagesGenerees.length == 11) {
-      genererNouvelleCarte(ListeImagesGenerees);
-    } else {
-      alert("Mauvais format de seed");
-    }
+  // Une fois la carte générée, on cache le bouton "Générer"
+  const boutonGenerer = document.getElementById("boutonGenerer");
+  if (boutonGenerer) {
+    boutonGenerer.style.display = "none";
   }
 }
 
 // ============================
-//    PARTAGE / COPIE LIEN
-// ============================
-
-function copierLien() {
-  const lienGeneré = window.location.href;
-
-  const textarea = document.createElement("textarea");
-  textarea.value = lienGeneré;
-  document.body.appendChild(textarea);
-  textarea.select();
-  textarea.setSelectionRange(0, 99999);
-  document.execCommand("copy");
-  document.body.removeChild(textarea);
-
-  alert("Lien copié dans le presse-papiers");
-}
-
-// ============================
-//          UTILS
-// ============================
-
-function shuffle(array) {
-  let currentIndex = array.length,
-    randomIndex;
-
-  while (currentIndex != 0) {
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex--;
-
-    [array[currentIndex], array[randomIndex]] = [
-      array[randomIndex],
-      array[currentIndex],
-    ];
-  }
-
-  return array;
-}
-
-// ============================
-//    SÉLECTION / SON
+//       SÉLECTION / SON
 // ============================
 
 function toggleSelected(cell) {
@@ -244,15 +137,37 @@ function jouerSonBingo() {
 }
 
 // ============================
+//   FONCTION DE MÉLANGE
+// ============================
+
+function shuffle(array) {
+  let currentIndex = array.length;
+  let randomIndex;
+
+  // Algorithme de Fisher–Yates
+  while (currentIndex !== 0) {
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex],
+      array[currentIndex],
+    ];
+  }
+
+  return array;
+}
+
+// ============================
 //   INITIALISATION
 // ============================
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Si une seed est présente dans l'URL -> on la lit
-  ControlSeedURL();
-
-  // Si pas de seed -> on génère une nouvelle grille
-  if (!window.location.search.includes("seed")) {
-    genererNouvelleCarte();
+  // Au chargement, on s'assure que le bouton "Générer une carte" est visible
+  const boutonGenerer = document.getElementById("boutonGenerer");
+  if (boutonGenerer) {
+    boutonGenerer.style.display = "block";
   }
+
+  // La carte n'est générée que quand on clique sur le bouton
 });

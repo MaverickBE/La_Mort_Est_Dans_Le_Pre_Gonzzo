@@ -8,7 +8,13 @@
     width: 260px;        /* taille de base sur écran large */
     height: auto;
     max-width: 100%;
+    transition: transform 0.3s ease;
 }
+
+/* Zoom au survol */
+#Logo_Mort_Pre:hover {
+    transform: scale(1.10); /* zoom léger */
+    }
 
 /* Écrans intermédiaires (tablettes, petits laptops) */
 @media only screen and (max-width: 1024px) {
@@ -52,6 +58,28 @@
     margin-bottom: 10px;
     transition: background-color 0.3s, color 0.3s;
 }
+
+#boutonHub:hover {
+    background-color: white;
+    color:#000000;
+}
+
+/* Style de base du bouton "Générer une nouvelle carte" */
+#boutonGenerer {
+    padding: 18px 18px;
+    align-items: center;
+    text-align: center;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 18px;
+    background-color: #000000;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 3px;
+    margin-bottom: 10px;
+    transition: background-color 0.3s, color 0.3s;
+}    
 
 /* Style au passage de la souris sur le bouton "Générer une nouvelle carte" */
 #boutonGenerer:hover {
