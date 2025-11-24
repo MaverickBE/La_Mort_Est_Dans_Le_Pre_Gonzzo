@@ -1,0 +1,343 @@
+/* LOGO "La Mort est dans le pré" */
+#Logo_Mort_Pre {
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 10px;
+    margin-left: auto;
+    margin-right: auto;  /* assure le centrage même si le flex change */
+    width: 260px;        /* taille de base sur écran large */
+    height: auto;
+    max-width: 100%;
+}
+
+/* Écrans intermédiaires (tablettes, petits laptops) */
+@media only screen and (max-width: 1024px) {
+    #Logo_Mort_Pre {
+        width: 230px;
+        margin-top: 12px;
+    }
+}
+
+/* Écrans type tablette verticale / petits écrans */
+@media only screen and (max-width: 768px) {
+    #Logo_Mort_Pre {
+        width: 200px;
+        margin-top: 10px;
+    }
+}
+
+/* Smartphones */
+@media only screen and (max-width: 480px) {
+    #Logo_Mort_Pre {
+        width: 70vw;      /* 70% de la largeur de l'écran */
+        max-width: 280px; /* mais ne dépasse pas 280px */
+        margin-top: 8px;
+    }
+}
+
+
+/* Style de base du bouton "Générer une nouvelle carte" */
+#boutonGenerer {
+    padding: 18px 18px;
+    align-items: center;
+    text-align: center;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 18px;
+    background-color: #000000;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 3px;
+    margin-bottom: 10px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* Style au passage de la souris sur le bouton "Générer une nouvelle carte" */
+#boutonGenerer:hover {
+    background-color: white;
+    color: #000000;
+}
+
+/* Le media querie pour ce bouton (écran 600px) */
+@media only screen and (max-width: 600px) {
+    #boutonGenerer {
+        max-width: 100%;
+    }
+}
+
+/* Le media querie pour ce bouton (écran 500px) */
+@media only screen and (max-width: 500px) {
+    #boutonGenerer {
+        font-size: 12px;
+        padding: 12px 12px;
+    }
+}
+
+/* Style de base du bouton "Partager ma carte" */
+#boutonPartager {
+    display: block;
+    padding: 18px 18px;
+    align-items: center;
+    text-align: center;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 18px;
+    background-color: #000000;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+/* Style au passage de la souris sur le bouton "Partager ma carte" */
+#boutonPartager:hover {
+    background-color: white;
+    color: #000000;
+}
+
+/* Le media querie pour ce bouton (écran 600px) */
+@media only screen and (max-width: 600px) {
+    #boutonPartager {
+        max-width: 100%;
+    }
+}
+
+/* Le media querie pour ce bouton (écran 500px) */
+@media only screen and (max-width: 500px) {
+    #boutonPartager {
+        font-size: 12px;
+        padding: 12px 12px;
+    }
+}
+
+/* Style de la vidéo en background */
+video {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%);
+    z-index: -1;
+}
+
+/* Le media querie pour cette vidéo (écran 600px) */
+@media only screen and (max-width: 600px) {
+    video {
+        width: auto;
+        height: auto;
+    }
+}
+
+/* Style de base du corps de la page */
+body {
+    background: black;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+}
+
+/* Style de base du fond du tableau */
+table {
+    background-color: rgb(0, 0, 0);
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+/* Style de base de la grille */
+td {
+    border: 7px solid #1d1c1c;
+    width: auto;
+    height: 100px;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+
+}
+
+/*  Transition quand l'image est deselectionnée */
+td img {
+    transition: transform 1.5s ease;
+}
+
+/* Rotation de l'image quand elle est selectionnée */
+.selected img {
+    transform: rotateY(360deg);
+    transition: transform 1.5s ease;
+}
+
+/* Le media querie pour cette vidéo (écran 600px) */
+@media only screen and (max-width: 600px) {
+    td img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    td {
+        height: 91px; /* Ajustez la hauteur de la case selon vos besoins */
+    }
+}
+
+@media only screen and (max-width: 500px) {
+    td img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    td {
+        height: 70px; /* Ajustez la hauteur de la case selon vos besoins */
+    }
+}
+
+img {
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+    width: auto;
+    height: auto;
+    position: relative;
+    z-index: 1;
+    display: block;
+    object-fit: fill;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 0, 0, 0.7);
+    z-index: 2;
+    display: none;
+}
+
+.selected {
+    position: relative;
+}
+
+.selected::before {
+    content: url('images/Bingo_confirme.png');
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.selected.show-logo::before {
+    opacity: 1;
+}
+
+.selected .overlay {
+    display: block;
+}
+
+.logo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    transition: transform 1.5s ease;
+}
+
+.selected .logo {
+    transform: translate(-50%, -50%) rotateY(180deg);
+    width: 70px;
+    height: 70px;
+}
+
+/* Le media querie pour cette vidéo (écran 600px) */
+@media only screen and (max-width: 600px) {
+    .selected .logo {
+        width: 50px;
+        height: 50px;
+    }
+}
+
+/* Le media querie pour cette vidéo (écran 500px) */
+@media only screen and (max-width: 500px) {
+    .selected .logo {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+#reseaux-sociaux {
+    margin-top: 10px;
+    display: flex;
+    gap: 20px;
+}
+
+.social-icon {
+    font-size: 40px;
+    color: #ffffff;
+    text-decoration: none;
+    width: 100%; 
+    max-width: 100%;
+    height: auto; 
+
+}
+
+.social-icon:hover {
+    color: #000000;
+}
+
+@media only screen and (max-width: 600px) {
+    .social-icon {
+        font-size: 20px;
+    }
+}
+
+#bingo-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 170px;
+    font-family: 'October Crow', 'Courier New', Courier, monospace;
+    color: #ffffff;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 20px;
+    display: none;
+    z-index: 3;
+}
+
+@media only screen and (max-width: 600px) {
+    #bingo-message {
+        font-size: 80px;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+}
+
+@keyframes fade {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.fade {
+    animation: fade 0.7s ease-in-out infinite alternate;
+    
+}
