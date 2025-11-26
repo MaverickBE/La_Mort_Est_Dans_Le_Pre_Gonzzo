@@ -1,6 +1,6 @@
-/* ==============================
+/* ===========================
    LOGO "La Mort est dans le pré"
-   ============================== */
+   =========================== */
 
 #Logo_Mort_Pre {
     display: block;
@@ -8,27 +8,27 @@
     margin-bottom: 10px;
     margin-left: auto;
     margin-right: auto;
-    width: 260px;      /* taille de base */
+    width: 260px;           /* taille de base */
     height: auto;
     max-width: 100%;
     transition: transform 0.3s ease;
 }
 
-/* Zoom au survol */
+/* Zoom au survol (desktop) */
 #Logo_Mort_Pre:hover {
     transform: scale(1.10);
 }
 
 /* Tablettes / petits laptops */
-@media only screen and (max-width: 1024px) {
+@media (max-width: 1024px) {
     #Logo_Mort_Pre {
         width: 230px;
         margin-top: 12px;
     }
 }
 
-/* Tablette verticale / petits écrans */
-@media only screen and (max-width: 768px) {
+/* Tablette verticale */
+@media (max-width: 768px) {
     #Logo_Mort_Pre {
         width: 200px;
         margin-top: 10px;
@@ -36,7 +36,7 @@
 }
 
 /* Smartphones */
-@media only screen and (max-width: 480px) {
+@media (max-width: 480px) {
     #Logo_Mort_Pre {
         width: 70vw;
         max-width: 280px;
@@ -44,22 +44,18 @@
     }
 }
 
+/* ===========================
+   BOUTONS (Générer / Hub)
+   =========================== */
 
-/* ==============================
-   BOUTONS D'ACTION
-   (Générer / Hub)
-   ============================== */
-
-/* Style commun */
-.bouton-action,
 #boutonGenerer,
 #boutonHub {
-    padding: 18px 24px;
+    padding: 14px 22px;
     text-align: center;
     font-family: 'Courier New', Courier, monospace;
     font-size: 18px;
-    background-color: #000000;
-    color: #ffffff;
+    background-color: #000;
+    color: #fff;
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -68,44 +64,40 @@
     transition: background-color 0.3s, color 0.3s, transform 0.2s;
     display: block;
     width: fit-content;
-    max-width: 420px;
+    max-width: 90vw;
 }
 
-/* Hover */
-.bouton-action:hover,
+/* même hover pour les deux boutons */
 #boutonGenerer:hover,
 #boutonHub:hover {
-    background-color: #ffffff;
-    color: #000000;
+    background-color: #fff;
+    color: #000;
     transform: scale(1.03);
 }
 
 /* Tablettes */
 @media (max-width: 768px) {
-    .bouton-action,
     #boutonGenerer,
     #boutonHub {
         font-size: 16px;
-        padding: 14px 18px;
-        max-width: 280px;
+        padding: 12px 18px;
+        max-width: 70vw;
     }
 }
 
 /* Smartphones */
 @media (max-width: 480px) {
-    .bouton-action,
     #boutonGenerer,
     #boutonHub {
         font-size: 14px;
         padding: 10px 14px;
-        max-width: 220px;
+        max-width: 65vw;
     }
 }
 
-
-/* ==============================
-   VIDÉO DE FOND
-   ============================== */
+/* ===========================
+   BACKGROUND VIDÉO
+   =========================== */
 
 video {
     position: fixed;
@@ -119,123 +111,131 @@ video {
     z-index: -1;
 }
 
-@media only screen and (max-width: 600px) {
+@media (max-width: 600px) {
     video {
         width: auto;
         height: auto;
     }
 }
 
-
-/* ==============================
-   BODY / LAYOUT
-   ============================== */
+/* ===========================
+   BODY
+   =========================== */
 
 body {
-    background: #000000;
+    background: black;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start; /* plus centré verticalement -> plus de crop */
-    min-height: 100vh;           /* permet de scroller si besoin */
+    justify-content: flex-start;   /* plus de centrage vertical forcé */
+    min-height: 100vh;             /* permet le scroll si la grille est grande */
     margin: 0;
     padding-top: 10px;
 }
 
-
-/* ==============================
-   TABLEAU / GRILLE 4x3
-   ============================== */
+/* ===========================
+   TABLE / GRILLE 4x3
+   =========================== */
 
 table {
-    background-color: #000000;
+    background-color: #000;
     border-spacing: 0;
     border-collapse: collapse;
-    margin-top: 8px;
+    width: 100%;
+    max-width: 390px;
+    margin-top: 10px;
 }
 
-/* Cellules */
+/* Cases */
 td {
     border: 7px solid #1d1c1c;
-    width: auto;
-    height: 100px;
+    width: calc(100% / 3);   /* 3 colonnes */
+    height: 118px;           /* hauteur suffisante pour voir le perso entier */
     text-align: center;
     vertical-align: middle;
     cursor: pointer;
     position: relative;
     overflow: hidden;
+    background-color: #000;
 }
 
-/* Images dans les cases */
+/* Images dans la grille */
 td img {
     width: 100%;
     height: 100%;
-    object-fit: cover;   /* remplit bien la case */
+    object-fit: contain;     /* 🔹 NE COUPE PLUS l’image, on la rentre dans la case */
+    display: block;
     transition: transform 1.5s ease;
 }
 
-/* Rotation de l'image quand la case est sélectionnée */
+/* Rotation sur sélection */
 .selected img {
     transform: rotateY(360deg);
 }
 
-/* Responsive sur mobile : cases un peu plus basses */
-@media only screen and (max-width: 600px) {
+/* Mobile : on réduit un peu la hauteur mais sans recouper l’image */
+@media (max-width: 600px) {
     td {
-        height: 91px;
+        height: 120px;
     }
 }
 
-@media only screen and (max-width: 500px) {
+@media (max-width: 500px) {
     td {
-        height: 70px;
+        height: 100px;
     }
 }
 
 
-/* ==============================
-   IMAGES GLOBALES (logo, icônes…)
-   ============================== */
+/* ===========================
+   OVERLAYS BLEU / ROSE
+   =========================== */
 
-img {
-    max-width: 100%;
-    max-height: 100%;
-    display: block;
-}
-
-
-/* ==============================
-   OVERLAY + COULEURS HOMME/FEMME
-   ============================== */
-
-/* Overlay de base (invisible tant que non sélectionné) */
 .overlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
+    background-color: transparent;    /* couleur ajoutée seulement quand selected */
     z-index: 2;
     display: none;
+    transition: background-color 0.3s ease;
 }
 
-/* Quand une case est sélectionnée, on affiche l’overlay */
+/* case sélectionnée (homme ou femme) */
 .selected .overlay {
     display: block;
 }
 
-/* 🔵 Case HOMME sélectionnée (classe .male ajoutée en JS) */
+/* Homme = BLEU */
 .selected.male .overlay {
-    background-color: rgba(0, 120, 255, 0.55);
+    background-color: rgba(0, 123, 255, 0.45);
 }
 
-/* 🌸 Case FEMME sélectionnée (classe .female ajoutée en JS) */
+/* Femme = ROSE */
 .selected.female .overlay {
-    background-color: rgba(255, 105, 180, 0.55);
+    background-color: rgba(255, 0, 150, 0.45);
 }
 
+/* Logo "Bingo" par-dessus l’overlay */
+.selected::before {
+    content: url('images/Bingo_confirme.png');
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease-in-out;
+}
 
-/* Logo Bingo dans l’overlay */
+.selected.show-logo::before {
+    opacity: 1;
+}
+
+/* Petit logo au centre (si tu veux le garder) */
 .logo {
     position: absolute;
     top: 50%;
@@ -244,7 +244,6 @@ img {
     width: 60px;
     height: 60px;
     transition: transform 1.5s ease;
-    z-index: 3;
 }
 
 .selected .logo {
@@ -253,25 +252,23 @@ img {
     height: 70px;
 }
 
-/* Logo + overlay plus petits sur mobile */
-@media only screen and (max-width: 600px) {
+@media (max-width: 600px) {
     .selected .logo {
         width: 50px;
         height: 50px;
     }
 }
 
-@media only screen and (max-width: 500px) {
+@media (max-width: 500px) {
     .selected .logo {
         width: 40px;
         height: 40px;
     }
 }
 
-
-/* ==============================
+/* ===========================
    RÉSEAUX SOCIAUX
-   ============================== */
+   =========================== */
 
 #reseaux-sociaux {
     margin-top: 10px;
@@ -289,16 +286,15 @@ img {
     color: #000000;
 }
 
-@media only screen and (max-width: 600px) {
+@media (max-width: 600px) {
     .social-icon {
         font-size: 20px;
     }
 }
 
-
-/* ==============================
-   MESSAGE "BINGO"
-   ============================== */
+/* ===========================
+   MESSAGE BINGO
+   =========================== */
 
 #bingo-message {
     position: fixed;
@@ -311,10 +307,10 @@ img {
     background-color: rgba(0, 0, 0, 0.7);
     padding: 20px;
     display: none;
-    z-index: 5;
+    z-index: 3;
 }
 
-@media only screen and (max-width: 600px) {
+@media (max-width: 600px) {
     #bingo-message {
         font-size: 80px;
     }
