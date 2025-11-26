@@ -1,10 +1,8 @@
 // ============================
 //   LA MORT EST DANS LE PRÉ
 //   Grille 4 x 3 (12 cases)
-//   - 11 images mélangées à chaque génération
-//   - 1 image FIXE au centre
-//   - hommes = overlay BLEU
-//   - femmes = overlay ROSE
+//   11 images mélangées + 1 image fixe au centre
+//   Hommes = overlay BLEU, Femmes = overlay ROSE
 // ============================
 
 console.log("script Mort Est Dans Le Pré chargé");
@@ -14,26 +12,25 @@ const GRID_ROWS = 4;
 const GRID_COLS = 3;
 const CENTER_ROW = 1; // 2e ligne (index 1)
 const CENTER_COL = 1; // 2e colonne (index 1)
-const imagesFolder = "images/";
 
-// --- LISTE DES IMAGES (11) ---
+// --- LISTE DES IMAGES ---
 const ListeImages = [
-  { id: 1,  name: "Batte.webp" },
-  { id: 2,  name: "Boucher.webp" },
-  { id: 3,  name: "Faux1.webp" },
-  { id: 4,  name: "Faux2.webp" },
-  { id: 5,  name: "Hache1.webp" },
-  { id: 6,  name: "Hache2.webp" },
-  { id: 7,  name: "Homme_Nu.webp" },
-  { id: 8,  name: "Machette.webp" },
-  { id: 9,  name: "Petite_Fille.webp" },
+  { id: 1, name: "Batte.webp" },
+  { id: 2, name: "Boucher.webp" },
+  { id: 3, name: "Faux1.webp" },
+  { id: 4, name: "Faux2.webp" },
+  { id: 5, name: "Hache1.webp" },
+  { id: 6, name: "Hache2.webp" },
+  { id: 7, name: "Homme_Nu.webp" },       // 🔹 attention au N majuscule ici
+  { id: 8, name: "Machette.webp" },
+  { id: 9, name: "Petite_Fille.webp" },
   { id: 10, name: "Sadako.webp" },
   { id: 11, name: "Robe.webp" },
 ];
 
 // Image FIXE au centre
 const centerImage = {
-  name: "Logo_Mort.png", // mets ici le vrai nom du fichier du centre
+  name: "Logo_Mort.png",   // adapte si c'est .webp dans ton dossier
 };
 
 // --- LISTES HOMMES / FEMMES POUR LES COULEURS ---
@@ -44,26 +41,12 @@ const FEMALE_IMAGES = new Set([
   "Sadako.webp",
 ]);
 
-// Tout ce qui n’est pas dans FEMALE_IMAGES sera traité comme “homme”
+// tout ce qui n’est pas dans FEMALE_IMAGES sera traité comme “homme”
 function getGenderClass(imageName) {
-  return FEMALE_IMAGES.has(imageName) ? "female" : "male";
-}
-
-// ============================
-//     FONCTION DE MÉLANGE
-// ============================
-
-function shuffle(array) {
-  let currentIndex = array.length;
-  while (currentIndex !== 0) {
-    const randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex--;
-    [array[currentIndex], array[randomIndex]] = [
-      array[randomIndex],
-      array[currentIndex],
-    ];
+  if (FEMALE_IMAGES.has(imageName)) {
+    return "female";
   }
-  return array;
+  return "male";
 }
 
 // ============================
@@ -75,6 +58,8 @@ function genererNouvelleCarte() {
 
   const table = document.getElementById("carte");
   if (!table) return;
+
+  const imagesFolder = "images/";
 
   // vider la grille
   table.innerHTML = "";
@@ -90,8 +75,9 @@ function genererNouvelleCarte() {
       const cell = row.insertCell(j);
       const img = document.createElement("img");
 
-      // Case centrale : image fixe, non cliquable
       const isCenter = i === CENTER_ROW && j === CENTER_COL;
+
+      // Case centrale : image fixe, non cliquable
       if (isCenter) {
         img.src = imagesFolder + centerImage.name;
         img.alt = "Image centre";
@@ -128,6 +114,15 @@ function genererNouvelleCarte() {
       }
     }
   }
+
+  // 🔽 Réduire le logo après génération de la carte
+  const logoMort = document.getElementById("Logo_Mort_Pre");
+  if (logoMort && !logoMort.classList.contains("logo-small")) {
+    logoMort.classList.add("logo-small");
+  }
+
+  // 🔽 Scroll vers la grille (pratique sur mobile)
+  table.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 // ============================
@@ -154,12 +149,29 @@ function jouerSonBingo() {
 }
 
 // ============================
+//         SHUFFLE
+// ============================
+
+function shuffle(array) {
+  let currentIndex = array.length;
+  while (currentIndex !== 0) {
+    const randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex],
+      array[currentIndex],
+    ];
+  }
+  return array;
+}
+
+// ============================
 //   INITIALISATION
 // ============================
 
 document.addEventListener("DOMContentLoaded", () => {
-  // La carte se génère quand tu cliques sur le bouton
-  // <button id="boutonGenerer" ...>Générer une carte</button>
-  // Si un jour tu veux qu'elle se génère automatiquement au chargement :
+  console.log("DOM chargé – en attente du bouton Générer");
+  // On génère la carte SEULEMENT quand tu cliques sur le bouton
+  // Si tu veux une grille dès l’arrivée sur le site, ajoute :
   // genererNouvelleCarte();
 });

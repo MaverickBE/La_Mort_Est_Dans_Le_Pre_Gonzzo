@@ -44,6 +44,28 @@
     }
 }
 
+/* --- Version petite du logo après génération de carte --- */
+#Logo_Mort_Pre.logo-small {
+    width: 180px;
+    margin-top: 8px;
+    margin-bottom: 4px;
+}
+
+/* Tablettes */
+@media (max-width: 768px) {
+    #Logo_Mort_Pre.logo-small {
+        width: 150px;
+    }
+}
+
+/* Smartphones */
+@media (max-width: 480px) {
+    #Logo_Mort_Pre.logo-small {
+        width: 120px;
+    }
+}
+
+
 /* ===========================
    BOUTONS (Générer / Hub)
    =========================== */
