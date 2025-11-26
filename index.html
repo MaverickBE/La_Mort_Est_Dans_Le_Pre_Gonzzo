@@ -16,19 +16,20 @@
 
     <!-- Vidéo de fond -->
     <video autoplay muted loop playsinline poster="images/Fond_site_secours.png"> 
-        <source src="videos/Fond_Grafton2.mp4" type="video/mp4">
+        <source src="videos/Video_Grafton.mp4" type="video/mp4">
     </video>
 
     <!-- Son quand on clique sur une case -->
     <audio id="bingoSound" src="bruits/Rire_validation.mp3"></audio>
 
     <!-- Bouton pour générer la carte (affiche la grille puis se cache) -->
-    <button id="boutonGenerer" type="button" onclick="genererNouvelleCarte()">
+    <button id="boutonGenerer" class="bouton-action" type="button" onclick="genererNouvelleCarte()">
         Générer une carte
     </button>
 
     <!-- Bouton pour retourner au hub Gonzzzo -->
     <button id="boutonHub"
+            class="bouton-action"
             type="button"
             onclick="window.location.href='https://maverickbe.github.io/Hub-Gonzzo/';">
         Retourner au Hub Gonzzzo

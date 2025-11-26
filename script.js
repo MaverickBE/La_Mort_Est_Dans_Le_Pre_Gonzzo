@@ -1,44 +1,70 @@
 // ============================
 //   LA MORT EST DANS LE PRÉ
 //   Grille 4 x 3 (12 cases)
-//   - PAS de seed
-//   - PAS de partage
-//   - 11 images random + 1 image fixe au centre
-//   - La carte se génère au clic sur le bouton
+//   - 11 images mélangées à chaque génération
+//   - 1 image FIXE au centre
+//   - hommes = overlay BLEU
+//   - femmes = overlay ROSE
 // ============================
 
 console.log("script Mort Est Dans Le Pré chargé");
 
-// --- CONFIG ---
-
+// --- CONFIG GRILLE ---
 const GRID_ROWS = 4;
 const GRID_COLS = 3;
-// 4 x 3 = 12 cases, dont 1 au centre => 11 images dans ListeImages
+const CENTER_ROW = 1; // 2e ligne (index 1)
+const CENTER_COL = 1; // 2e colonne (index 1)
+const imagesFolder = "images/";
 
-// Case "centrale" (2e ligne, 2e colonne : index 1,1)
-const CENTER_ROW = 1;
-const CENTER_COL = 1;
-
-// 11 images pour toutes les cases SAUF le centre
-// ➜ vérifie que les noms correspondent EXACTEMENT à tes fichiers dans /images
+// --- LISTE DES IMAGES (11) ---
 const ListeImages = [
-  { id: 1, name: "Fantome.webp" },
-  { id: 2, name: "Démon.webp" },
-  { id: 3, name: "Jumeaux.webp" },
-  { id: 4, name: "Djinn.webp" },
-  { id: 5, name: "Yurei.webp" },
-  { id: 6, name: "Moroi.webp" },
-  { id: 7, name: "Goryo.webp" },
-  { id: 8, name: "Mimic.webp" },
-  { id: 9, name: "Banshee.webp" },
-  { id: 10, name: "Moroi.webp" },
-  { id: 11, name: "Revenant.webp" },
+  { id: 1,  name: "Batte.webp" },
+  { id: 2,  name: "Boucher.webp" },
+  { id: 3,  name: "Faux1.webp" },
+  { id: 4,  name: "Faux2.webp" },
+  { id: 5,  name: "Hache1.webp" },
+  { id: 6,  name: "Hache2.webp" },
+  { id: 7,  name: "Homme_nu.webp" },
+  { id: 8,  name: "Machette.webp" },
+  { id: 9,  name: "Petite_Fille.webp" },
+  { id: 10, name: "Sadako.webp" },
+  { id: 11, name: "Robe.webp" },
 ];
 
 // Image FIXE au centre
 const centerImage = {
-  name: "Logo_Mort.png", // ➜ fichier pour la case centrale
+  name: "Logo_Mort.png", // mets ici le vrai nom du fichier du centre
 };
+
+// --- LISTES HOMMES / FEMMES POUR LES COULEURS ---
+const FEMALE_IMAGES = new Set([
+  "Faux2.webp",
+  "Petite_Fille.webp",
+  "Robe.webp",
+  "Sadako.webp",
+]);
+
+// Tout ce qui n’est pas dans FEMALE_IMAGES sera traité comme “homme”
+function getGenderClass(imageName) {
+  return FEMALE_IMAGES.has(imageName) ? "female" : "male";
+}
+
+// ============================
+//     FONCTION DE MÉLANGE
+// ============================
+
+function shuffle(array) {
+  let currentIndex = array.length;
+  while (currentIndex !== 0) {
+    const randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex],
+      array[currentIndex],
+    ];
+  }
+  return array;
+}
 
 // ============================
 //       GÉNÉRATION CARTE
@@ -48,19 +74,13 @@ function genererNouvelleCarte() {
   console.log("Génération de la carte...");
 
   const table = document.getElementById("carte");
-  const imagesFolder = "images/";
+  if (!table) return;
 
-  if (!table) {
-    console.error("Table #carte introuvable dans le HTML");
-    return;
-  }
-
-  // Vider la grille si elle existait déjà
+  // vider la grille
   table.innerHTML = "";
 
-  // On crée une copie mélangée de la liste d'images
+  // 👉 on mélange les 11 images à chaque génération
   const imagesMelangees = shuffle([...ListeImages]);
-
   let indexImage = 0;
 
   for (let i = 0; i < GRID_ROWS; i++) {
@@ -68,30 +88,31 @@ function genererNouvelleCarte() {
 
     for (let j = 0; j < GRID_COLS; j++) {
       const cell = row.insertCell(j);
-
       const img = document.createElement("img");
 
-      // Case centrale : image fixe
-      if (i === CENTER_ROW && j === CENTER_COL) {
+      // Case centrale : image fixe, non cliquable
+      const isCenter = i === CENTER_ROW && j === CENTER_COL;
+      if (isCenter) {
         img.src = imagesFolder + centerImage.name;
         img.alt = "Image centre";
       } else {
-        // Toutes les autres cases : on parcourt la liste mélangée
         const imageData = imagesMelangees[indexImage];
-        if (!imageData) {
-          console.warn("Pas assez d'images dans ListeImages pour remplir la grille");
-          continue;
-        }
         img.src = imagesFolder + imageData.name;
         img.alt = "Image " + imageData.id;
+
+        // on ajoute la classe male/female pour la couleur d’overlay
+        const genderClass = getGenderClass(imageData.name);
+        cell.classList.add(genderClass);
+
         indexImage++;
       }
 
+      // overlay + logo
       const overlay = document.createElement("div");
       overlay.className = "overlay";
 
       const logo = document.createElement("img");
-      logo.src = "images/Bingo_confirme.webp";
+      logo.src = imagesFolder + "Bingo_confirme.webp";
       logo.alt = "Bingo_confirme";
       logo.className = "logo";
 
@@ -99,17 +120,13 @@ function genererNouvelleCarte() {
       cell.appendChild(img);
       cell.appendChild(overlay);
 
-      // Clic = coche/décoche + son
-      cell.addEventListener("click", function () {
-        toggleSelected(this);
-      });
+      // clic = coche/décoche + son (sauf case centrale)
+      if (!isCenter) {
+        cell.addEventListener("click", function () {
+          toggleSelected(this);
+        });
+      }
     }
-  }
-
-  // Une fois la carte générée, on cache le bouton "Générer"
-  const boutonGenerer = document.getElementById("boutonGenerer");
-  if (boutonGenerer) {
-    boutonGenerer.style.display = "none";
   }
 }
 
@@ -137,37 +154,12 @@ function jouerSonBingo() {
 }
 
 // ============================
-//   FONCTION DE MÉLANGE
-// ============================
-
-function shuffle(array) {
-  let currentIndex = array.length;
-  let randomIndex;
-
-  // Algorithme de Fisher–Yates
-  while (currentIndex !== 0) {
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex--;
-
-    [array[currentIndex], array[randomIndex]] = [
-      array[randomIndex],
-      array[currentIndex],
-    ];
-  }
-
-  return array;
-}
-
-// ============================
 //   INITIALISATION
 // ============================
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Au chargement, on s'assure que le bouton "Générer une carte" est visible
-  const boutonGenerer = document.getElementById("boutonGenerer");
-  if (boutonGenerer) {
-    boutonGenerer.style.display = "block";
-  }
-
-  // La carte n'est générée que quand on clique sur le bouton
+  // La carte se génère quand tu cliques sur le bouton
+  // <button id="boutonGenerer" ...>Générer une carte</button>
+  // Si un jour tu veux qu'elle se génère automatiquement au chargement :
+  // genererNouvelleCarte();
 });

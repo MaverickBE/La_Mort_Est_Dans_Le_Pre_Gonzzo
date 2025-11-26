@@ -1,11 +1,14 @@
-/* LOGO "La Mort est dans le pré" */
+/* ==============================
+   LOGO "La Mort est dans le pré"
+   ============================== */
+
 #Logo_Mort_Pre {
     display: block;
     margin-top: 15px;
     margin-bottom: 10px;
     margin-left: auto;
-    margin-right: auto;  /* assure le centrage même si le flex change */
-    width: 260px;        /* taille de base sur écran large */
+    margin-right: auto;
+    width: 260px;      /* taille de base */
     height: auto;
     max-width: 100%;
     transition: transform 0.3s ease;
@@ -13,10 +16,10 @@
 
 /* Zoom au survol */
 #Logo_Mort_Pre:hover {
-    transform: scale(1.10); /* zoom léger */
-    }
+    transform: scale(1.10);
+}
 
-/* Écrans intermédiaires (tablettes, petits laptops) */
+/* Tablettes / petits laptops */
 @media only screen and (max-width: 1024px) {
     #Logo_Mort_Pre {
         width: 230px;
@@ -24,7 +27,7 @@
     }
 }
 
-/* Écrans type tablette verticale / petits écrans */
+/* Tablette verticale / petits écrans */
 @media only screen and (max-width: 768px) {
     #Logo_Mort_Pre {
         width: 200px;
@@ -35,111 +38,75 @@
 /* Smartphones */
 @media only screen and (max-width: 480px) {
     #Logo_Mort_Pre {
-        width: 70vw;      /* 70% de la largeur de l'écran */
-        max-width: 280px; /* mais ne dépasse pas 280px */
+        width: 70vw;
+        max-width: 280px;
         margin-top: 8px;
     }
 }
 
 
-/* Style de base du bouton "Générer une nouvelle carte" */
+/* ==============================
+   BOUTONS D'ACTION
+   (Générer / Hub)
+   ============================== */
+
+/* Style commun */
+.bouton-action,
+#boutonGenerer,
 #boutonHub {
-    padding: 18px 18px;
-    align-items: center;
+    padding: 18px 24px;
     text-align: center;
     font-family: 'Courier New', Courier, monospace;
     font-size: 18px;
     background-color: #000000;
-    color: white;
+    color: #ffffff;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    margin-top: 3px;
+    margin-top: 6px;
     margin-bottom: 10px;
-    transition: background-color 0.3s, color 0.3s;
-}
-
-#boutonHub:hover {
-    background-color: white;
-    color:#000000;
-}
-
-/* Style de base du bouton "Générer une nouvelle carte" */
-#boutonGenerer {
-    padding: 18px 18px;
-    align-items: center;
-    text-align: center;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 18px;
-    background-color: #000000;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-top: 3px;
-    margin-bottom: 10px;
-    transition: background-color 0.3s, color 0.3s;
-}    
-
-/* Style au passage de la souris sur le bouton "Générer une nouvelle carte" */
-#boutonGenerer:hover {
-    background-color: white;
-    color: #000000;
-}
-
-/* Le media querie pour ce bouton (écran 600px) */
-@media only screen and (max-width: 600px) {
-    #boutonGenerer {
-        max-width: 100%;
-    }
-}
-
-/* Le media querie pour ce bouton (écran 500px) */
-@media only screen and (max-width: 500px) {
-    #boutonGenerer {
-        font-size: 12px;
-        padding: 12px 12px;
-    }
-}
-
-/* Style de base du bouton "Partager ma carte" */
-#boutonPartager {
+    transition: background-color 0.3s, color 0.3s, transform 0.2s;
     display: block;
-    padding: 18px 18px;
-    align-items: center;
-    text-align: center;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 18px;
-    background-color: #000000;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-bottom: 10px;
+    width: fit-content;
+    max-width: 420px;
 }
 
-/* Style au passage de la souris sur le bouton "Partager ma carte" */
-#boutonPartager:hover {
-    background-color: white;
+/* Hover */
+.bouton-action:hover,
+#boutonGenerer:hover,
+#boutonHub:hover {
+    background-color: #ffffff;
     color: #000000;
+    transform: scale(1.03);
 }
 
-/* Le media querie pour ce bouton (écran 600px) */
-@media only screen and (max-width: 600px) {
-    #boutonPartager {
-        max-width: 100%;
+/* Tablettes */
+@media (max-width: 768px) {
+    .bouton-action,
+    #boutonGenerer,
+    #boutonHub {
+        font-size: 16px;
+        padding: 14px 18px;
+        max-width: 280px;
     }
 }
 
-/* Le media querie pour ce bouton (écran 500px) */
-@media only screen and (max-width: 500px) {
-    #boutonPartager {
-        font-size: 12px;
-        padding: 12px 12px;
+/* Smartphones */
+@media (max-width: 480px) {
+    .bouton-action,
+    #boutonGenerer,
+    #boutonHub {
+        font-size: 14px;
+        padding: 10px 14px;
+        max-width: 220px;
     }
 }
 
-/* Style de la vidéo en background */
+
+/* ==============================
+   VIDÉO DE FOND
+   ============================== */
+
 video {
     position: fixed;
     top: 50%;
@@ -152,7 +119,6 @@ video {
     z-index: -1;
 }
 
-/* Le media querie pour cette vidéo (écran 600px) */
 @media only screen and (max-width: 600px) {
     video {
         width: auto;
@@ -160,25 +126,35 @@ video {
     }
 }
 
-/* Style de base du corps de la page */
+
+/* ==============================
+   BODY / LAYOUT
+   ============================== */
+
 body {
-    background: black;
+    background: #000000;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    height: 100vh;
+    justify-content: flex-start; /* plus centré verticalement -> plus de crop */
+    min-height: 100vh;           /* permet de scroller si besoin */
     margin: 0;
+    padding-top: 10px;
 }
 
-/* Style de base du fond du tableau */
+
+/* ==============================
+   TABLEAU / GRILLE 4x3
+   ============================== */
+
 table {
-    background-color: rgb(0, 0, 0);
+    background-color: #000000;
     border-spacing: 0;
     border-collapse: collapse;
+    margin-top: 8px;
 }
 
-/* Style de base de la grille */
+/* Cellules */
 td {
     border: 7px solid #1d1c1c;
     width: auto;
@@ -188,92 +164,78 @@ td {
     cursor: pointer;
     position: relative;
     overflow: hidden;
-
 }
 
-/*  Transition quand l'image est deselectionnée */
+/* Images dans les cases */
 td img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;   /* remplit bien la case */
     transition: transform 1.5s ease;
 }
 
-/* Rotation de l'image quand elle est selectionnée */
+/* Rotation de l'image quand la case est sélectionnée */
 .selected img {
     transform: rotateY(360deg);
-    transition: transform 1.5s ease;
 }
 
-/* Le media querie pour cette vidéo (écran 600px) */
+/* Responsive sur mobile : cases un peu plus basses */
 @media only screen and (max-width: 600px) {
-    td img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-    }
-
     td {
-        height: 91px; /* Ajustez la hauteur de la case selon vos besoins */
+        height: 91px;
     }
 }
 
 @media only screen and (max-width: 500px) {
-    td img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-    }
-
     td {
-        height: 70px; /* Ajustez la hauteur de la case selon vos besoins */
+        height: 70px;
     }
 }
+
+
+/* ==============================
+   IMAGES GLOBALES (logo, icônes…)
+   ============================== */
 
 img {
     max-width: 100%;
     max-height: 100%;
     display: block;
-    width: auto;
-    height: auto;
-    position: relative;
-    z-index: 1;
-    display: block;
-    object-fit: fill;
 }
 
+
+/* ==============================
+   OVERLAY + COULEURS HOMME/FEMME
+   ============================== */
+
+/* Overlay de base (invisible tant que non sélectionné) */
 .overlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(255, 0, 0, 0.7);
     z-index: 2;
     display: none;
 }
 
-.selected {
-    position: relative;
-}
-
-.selected::before {
-    content: url('images/Bingo_confirme.png');
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease-in-out;
-}
-
-.selected.show-logo::before {
-    opacity: 1;
-}
-
+/* Quand une case est sélectionnée, on affiche l’overlay */
 .selected .overlay {
     display: block;
 }
 
+/* 🔵 Case HOMME sélectionnée (classe .male ajoutée en JS) */
+.selected.male .overlay {
+    background-color: rgba(0, 120, 255, 0.55);
+}
+
+/* 🌸 Case FEMME sélectionnée (classe .female ajoutée en JS) */
+.selected.female .overlay {
+    background-color: rgba(255, 105, 180, 0.55);
+}
+
+
+/* Logo Bingo dans l’overlay */
 .logo {
     position: absolute;
     top: 50%;
@@ -282,6 +244,7 @@ img {
     width: 60px;
     height: 60px;
     transition: transform 1.5s ease;
+    z-index: 3;
 }
 
 .selected .logo {
@@ -290,7 +253,7 @@ img {
     height: 70px;
 }
 
-/* Le media querie pour cette vidéo (écran 600px) */
+/* Logo + overlay plus petits sur mobile */
 @media only screen and (max-width: 600px) {
     .selected .logo {
         width: 50px;
@@ -298,13 +261,17 @@ img {
     }
 }
 
-/* Le media querie pour cette vidéo (écran 500px) */
 @media only screen and (max-width: 500px) {
     .selected .logo {
         width: 40px;
         height: 40px;
     }
 }
+
+
+/* ==============================
+   RÉSEAUX SOCIAUX
+   ============================== */
 
 #reseaux-sociaux {
     margin-top: 10px;
@@ -316,10 +283,6 @@ img {
     font-size: 40px;
     color: #ffffff;
     text-decoration: none;
-    width: 100%; 
-    max-width: 100%;
-    height: auto; 
-
 }
 
 .social-icon:hover {
@@ -332,6 +295,11 @@ img {
     }
 }
 
+
+/* ==============================
+   MESSAGE "BINGO"
+   ============================== */
+
 #bingo-message {
     position: fixed;
     top: 50%;
@@ -343,29 +311,20 @@ img {
     background-color: rgba(0, 0, 0, 0.7);
     padding: 20px;
     display: none;
-    z-index: 3;
+    z-index: 5;
 }
 
 @media only screen and (max-width: 600px) {
     #bingo-message {
         font-size: 80px;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
     }
 }
 
 @keyframes fade {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
+    from { opacity: 0; }
+    to   { opacity: 1; }
 }
 
 .fade {
     animation: fade 0.7s ease-in-out infinite alternate;
-    
 }
