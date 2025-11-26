@@ -24,7 +24,7 @@ const ListeImages = [
   { id: 4,  name: "Faux2.webp" },
   { id: 5,  name: "Hache1.webp" },
   { id: 6,  name: "Hache2.webp" },
-  { id: 7,  name: "Homme_nu.webp" },
+  { id: 7,  name: "Homme_Nu.webp" },
   { id: 8,  name: "Machette.webp" },
   { id: 9,  name: "Petite_Fille.webp" },
   { id: 10, name: "Sadako.webp" },
