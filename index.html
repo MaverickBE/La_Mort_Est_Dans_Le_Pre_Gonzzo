@@ -25,27 +25,36 @@
     <!-- 🔊 Son de victoire (applaudissements) -->
     <audio id="victorySound" src="bruits/Applaudissements.mp3"></audio>
 
-    <!-- Bouton pour générer la carte (affiche la grille puis se cache) -->
+    <!-- Bouton pour générer la carte -->
     <button id="boutonGenerer" class="bouton-action" type="button" onclick="genererNouvelleCarte()">
         Générer une carte
     </button>
 
-    <!-- Bouton pour retourner au hub Gonzzzo -->
+    <!-- Bouton pour retourner au hub Gonzzo -->
     <button id="boutonHub"
             class="bouton-action"
             type="button"
             onclick="window.location.href='https://maverickbe.github.io/Hub-Gonzzo/';">
-        Retourner au Hub Gonzzo
+        Retour au Hub Gonzzo
     </button>
 
-    <!-- Grille -->
-    <table id="carte"></table>
+    <!-- WRAPPER : grille + historique malus -->
+    <div id="main-wrapper">
+        <!-- Grille -->
+        <table id="carte"></table>
 
-    <!-- Message de malus -->
-     <div id="malus-message"></div>
+        <!-- Panneau historique des malus -->
+        <aside id="malus-panel">
+            <h2>Historique des malus</h2>
+            <ul id="malus-list"></ul>
+        </aside>
+    </div>
+
+    <!-- Message de malus (popup centrale) -->
+    <div id="malus-message"></div>
 
     <!-- Message de victoire -->
-     <div id="victory-message"></div>
+    <div id="victory-message"></div>
 
     <!-- Réseaux sociaux -->
     <div id="reseaux-sociaux">

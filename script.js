@@ -5,8 +5,7 @@
 //   - 1 image fixe au centre
 //   - Cases hommes = overlay BLEU
 //   - Cases femmes = overlay ROSE
-//   - À chaque nouvelle case cochée (max 10) => MALUS aléatoire
-//   - 11e case cochée = pas de malus
+//   - 10 malus / grille, 11e case = victoire
 // ============================
 
 console.log("script Mort Est Dans Le Pré chargé");
@@ -14,8 +13,8 @@ console.log("script Mort Est Dans Le Pré chargé");
 // --- CONFIG GRILLE ---
 const GRID_ROWS = 4;
 const GRID_COLS = 3;
-const CENTER_ROW = 1; // 2e ligne (index 1)
-const CENTER_COL = 1; // 2e colonne (index 1)
+const CENTER_ROW = 1;
+const CENTER_COL = 1;
 const imagesFolder = "images/";
 
 // --- LISTE DES IMAGES ---
@@ -26,7 +25,7 @@ const ListeImages = [
   { id: 4, name: "Faux2.webp" },
   { id: 5, name: "Hache1.webp" },
   { id: 6, name: "Hache2.webp" },
-  { id: 7, name: "Homme_Nu.webp" }, // ⚠ bien avec le N majuscule
+  { id: 7, name: "Homme_Nu.webp" },
   { id: 8, name: "Machette.webp" },
   { id: 9, name: "Petite_Fille.webp" },
   { id: 10, name: "Sadako.webp" },
@@ -35,11 +34,10 @@ const ListeImages = [
 
 // Image FIXE au centre
 const centerImage = {
-  name: "Logo_Mort.png", // mets bien le bon nom de fichier
+  name: "Logo_Mort.png",
 };
 
 // --- HOMMES / FEMMES POUR LES COULEURS ---
-// Femmes = rose, les autres = hommes = bleu
 const FEMALE_IMAGES = new Set([
   "Faux2.webp",
   "Petite_Fille.webp",
@@ -48,48 +46,84 @@ const FEMALE_IMAGES = new Set([
 ]);
 
 function getGenderClass(imageName) {
-  if (FEMALE_IMAGES.has(imageName)) {
-    return "female";
-  }
-  return "male";
+  return FEMALE_IMAGES.has(imageName) ? "female" : "male";
 }
 
 // ============================
 //         MALUS
 // ============================
 
-// Tu peux mettre PLUS de 10 malus ici.
-// Le jeu en utilisera 10 différents par grille.
 const MALUS_LIST = [
   "0% de sante mentale",
   "-1 preuve",
   "Sprint OFF",
-  "Pas de cachettes autorisees",
-  "Lumiere interdite",
-  "Pas de self-care",
-  "Pas de talkie-walkie",
-  "Marche accroupie obligatoire",
-  "Interdiction de fuir la premiere chasse",
-  "Un seul objet bonus autorise",
-  // Tu peux en rajouter autant que tu veux :
-  "Pas le droit de fermer les portes",
-  "Micro coupe pour le prochain run",
+  "Pas de lampe torche",
+  "0 objet maudit",
+  "EMF interdit",
+  "Thermo interdit",
+  "Objets électroniques interdit",
+  "Objets non électroniques interdit",
+  "Pas d'encens",
+  "Pas de crucifix",
+  "50% de santé mentale",
+  "Sprint illimité",
+  "Sold out",
+  "Full T1",
+  "Full T2",
+  "Vitesse joueur 50%",
+  "Vitesse joueur 150%",
+  "Pas de cachettes",
+  "Disjoncteur cassé",
 ];
 
-const MAX_MALUS_PER_GRID = 10; // ✅ on limite à 10 par grille
+const MAX_MALUS_PER_GRID = 10;
 
 let malusPool = [];
 let malusIndex = 0;
-let malusShownCount = 0; // combien de malus déjà attribués (max 10)
-let victoryJustTriggered = false; // true uniquement sur le clic de la 11e case
+let malusShownCount = 0;
+let victoryJustTriggered = false;
 
 // file d’attente des malus à afficher
 let malusQueue = [];
 let malusDisplaying = false;
 let malusTimeoutId = null;
 
+function showMalusPanel() {
+  const panel = document.getElementById("malus-panel");
+  if (panel) panel.style.display = "block";
+}
+
+function hideMalusPanel() {
+  const panel = document.getElementById("malus-panel");
+  if (panel) panel.style.display = "none";
+}
+
+
+// ============================
+//   HISTORIQUE DES MALUS
+// ============================
+
+function resetMalusHistorique() {
+  const ul = document.getElementById("malus-list");
+  if (ul) {
+    ul.innerHTML = "";
+  }
+}
+
+function ajouterMalusHistorique(text) {
+  const ul = document.getElementById("malus-list");
+  if (!ul) return;
+
+  const li = document.createElement("li");
+  li.textContent = `Malus ${malusShownCount} : ${text}`;
+  ul.appendChild(li);
+}
+
+// ============================
+//   GESTION MALUS POPUP
+// ============================
+
 function initMalusPool() {
-  // copie + mélange de la liste de malus
   malusPool = shuffle([...MALUS_LIST]);
   malusIndex = 0;
   malusShownCount = 0;
@@ -99,9 +133,21 @@ function initMalusPool() {
     clearTimeout(malusTimeoutId);
     malusTimeoutId = null;
   }
+
+  const box = document.getElementById("malus-message");
+  if (box) {
+    box.style.display = "none";
+    box.classList.remove("show");
+  }
+
+  // reset historique pour la nouvelle grille
+  resetMalusHistorique();
+
+  // 🔹 on cache le panneau au début de la game
+  hideMalusPanel();
 }
 
-// Ajoute un malus à la file d'affichage
+// Ajoute un malus à la file d'affichage (popup centrale)
 function showMalusMessage(text) {
   malusQueue.push(text);
   if (!malusDisplaying) {
@@ -109,13 +155,13 @@ function showMalusMessage(text) {
   }
 }
 
-// Affiche le prochain malus de la file
 function displayNextMalus() {
   const box = document.getElementById("malus-message");
   if (!box) return;
 
   if (malusQueue.length === 0) {
     malusDisplaying = false;
+    box.classList.remove("show");
     box.style.display = "none";
     return;
   }
@@ -125,12 +171,18 @@ function displayNextMalus() {
 
   box.textContent = text;
   box.style.display = "block";
+  box.classList.remove("show");
+  void box.offsetWidth; // reflow
+  box.classList.add("show");
 
-  // 💡 chaque malus reste 5 SECONDES
   malusTimeoutId = setTimeout(() => {
     displayNextMalus();
   }, 5000);
 }
+
+// ============================
+//   FIN DE PARTIE
+// ============================
 
 function nettoyerGrilleApresVictoire() {
   const table = document.getElementById("carte");
@@ -138,13 +190,12 @@ function nettoyerGrilleApresVictoire() {
     table.innerHTML = "";
   }
 
-  // On cache le message de malus si encore affiché
   const malusBox = document.getElementById("malus-message");
   if (malusBox) {
     malusBox.style.display = "none";
+    malusBox.classList.remove("show");
   }
 
-  // On reset la file de malus
   malusQueue = [];
   malusDisplaying = false;
   if (malusTimeoutId) {
@@ -152,16 +203,16 @@ function nettoyerGrilleApresVictoire() {
     malusTimeoutId = null;
   }
 
-  // On remet le logo en grand pour la prochaine run
   const logoMort = document.getElementById("Logo_Mort_Pre");
   if (logoMort) {
     logoMort.classList.remove("logo-small");
   }
 
-  // Remonte en haut de la page
   window.scrollTo({ top: 0, behavior: "smooth" });
-}
 
+  // 🔹 panneau historique caché après la game
+  hideMalusPanel();
+}
 
 function showVictoryMessage() {
   const box = document.getElementById("victory-message");
@@ -169,7 +220,7 @@ function showVictoryMessage() {
 
   if (!box) return;
 
-  // On coupe proprement les malus en cours
+  // stop malus
   malusQueue = [];
   malusDisplaying = false;
   if (malusTimeoutId) {
@@ -178,16 +229,18 @@ function showVictoryMessage() {
   }
   if (malusBox) {
     malusBox.style.display = "none";
+    malusBox.classList.remove("show");
   }
 
-  // 🔊 son de victoire
+  // son de victoire
   jouerSonVictoire();
-  
-  box.textContent = "🎉Felicitations🎉";
+
+  box.textContent = "🎉 Félicitations 🎉";
   box.style.display = "block";
+  box.classList.remove("show");
+  void box.offsetWidth;
   box.classList.add("show");
 
-  // On laisse le message 5s, puis on nettoie la grille
   setTimeout(() => {
     box.classList.remove("show");
     box.style.display = "none";
@@ -195,24 +248,21 @@ function showVictoryMessage() {
   }, 10000);
 }
 
+// ============================
+//   MALUS SUR CASE
+// ============================
 
-// Appelé quand une case passe de "non cochée" -> "cochée"
 function maybeAssignMalus(cell) {
-  // si cette case a déjà reçu un malus avant, on ne recommence pas
   if (cell.dataset.malusAssigned === "1") return;
 
-  // si on a déjà donné le max de malus = la prochaine case (11e) => VICTOIRE
+  // si on a déjà donné 10 malus, la prochaine case cochée => victoire
   if (malusShownCount >= MAX_MALUS_PER_GRID) {
     cell.dataset.malusAssigned = "1";
-    
-    // ✅ on indique qu'une victoire vient de se produire
     victoryJustTriggered = true;
-
-    showVictoryMessage(); // 🎉 victoire
+    showVictoryMessage();
     return;
   }
 
-  // sécurité : si plus de malus dispo
   if (malusIndex >= malusPool.length) return;
 
   const malusText = malusPool[malusIndex];
@@ -221,9 +271,14 @@ function maybeAssignMalus(cell) {
 
   cell.dataset.malusAssigned = "1";
 
-  showMalusMessage(malusText);
-}
+  // 🔹 dès qu'on a un premier malus, on affiche le panneau historique
+  showMalusPanel();
 
+  // popup centrale
+  showMalusMessage(malusText);
+  // historique à droite / en bas
+  ajouterMalusHistorique(malusText);
+}
 
 
 // ============================
@@ -236,13 +291,9 @@ function genererNouvelleCarte() {
   const table = document.getElementById("carte");
   if (!table) return;
 
-  // réinitialise le pool de malus pour cette nouvelle grille
   initMalusPool();
-
-  // vider la grille
   table.innerHTML = "";
 
-  // on mélange les 11 images à chaque génération
   const imagesMelangees = shuffle([...ListeImages]);
   let indexImage = 0;
 
@@ -256,23 +307,19 @@ function genererNouvelleCarte() {
       const isCenter = i === CENTER_ROW && j === CENTER_COL;
 
       if (isCenter) {
-        // Case CENTRALE : image fixe, ni male ni female, pas cliquable
         img.src = imagesFolder + centerImage.name;
         img.alt = "Image centre";
       } else {
-        // Les 11 autres cases : images mélangées
         const imageData = imagesMelangees[indexImage];
         img.src = imagesFolder + imageData.name;
         img.alt = "Image " + imageData.id;
 
-        // Ajoute la classe male/female pour la couleur d’overlay
         const genderClass = getGenderClass(imageData.name);
         cell.classList.add(genderClass);
 
         indexImage++;
       }
 
-      // overlay + logo central
       const overlay = document.createElement("div");
       overlay.className = "overlay";
 
@@ -285,7 +332,6 @@ function genererNouvelleCarte() {
       cell.appendChild(img);
       cell.appendChild(overlay);
 
-      // clic = coche/décoche + son (sauf pour la case centrale)
       if (!isCenter) {
         cell.addEventListener("click", function () {
           toggleSelected(this);
@@ -294,7 +340,6 @@ function genererNouvelleCarte() {
     }
   }
 
-  // Réduire le logo en haut quand une carte est générée
   const logoMort = document.getElementById("Logo_Mort_Pre");
   if (logoMort) {
     logoMort.classList.add("logo-small");
@@ -309,21 +354,18 @@ function toggleSelected(cell) {
   const wasSelected = cell.classList.contains("selected");
 
   if (wasSelected) {
-    // on décoche => pas de malus
     cell.classList.remove("selected");
     console.log("Case unselected");
   } else {
-    // on coche => malus éventuel ou victoire
     cell.classList.add("selected");
     console.log("Case selected");
     maybeAssignMalus(cell);
   }
 
-  // 👉 Si une victoire vient d’être déclenchée, NE PAS jouer le son bingo
+  // si victoire → pas de son bingo
   if (!victoryJustTriggered) {
     jouerSonBingo();
   } else {
-    // Reset pour les prochains clics
     victoryJustTriggered = false;
   }
 }
@@ -338,10 +380,9 @@ function jouerSonBingo() {
 function jouerSonVictoire() {
   const audio = document.getElementById("victorySound");
   if (!audio) return;
-  audio.volume = 0.4; // tu peux ajuster
+  audio.volume = 0.4;
   audio.play();
 }
-
 
 // ============================
 //   UTILITAIRE : SHUFFLE
@@ -366,6 +407,5 @@ function shuffle(array) {
 
 document.addEventListener("DOMContentLoaded", () => {
   // On attend le clic sur "Générer une carte"
-  // Si un jour tu veux générer direct au chargement :
   // genererNouvelleCarte();
 });

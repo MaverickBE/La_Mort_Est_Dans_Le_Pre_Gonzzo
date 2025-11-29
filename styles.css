@@ -8,18 +8,22 @@
     margin-bottom: 10px;
     margin-left: auto;
     margin-right: auto;
-    width: 260px;           /* taille de base */
+    width: 260px;
     height: auto;
     max-width: 100%;
-    transition: transform 0.3s ease, width 0.3s ease, margin-top 0.3s ease;
+    transition:
+        transform 0.3s ease,
+        width 0.3s ease,
+        margin-top 0.3s ease,
+        filter 0.3s ease;
+    filter: drop-shadow(0 0 8px rgba(0,0,0,0.7));
 }
 
-/* Zoom au survol (desktop) */
 #Logo_Mort_Pre:hover {
     transform: scale(1.10);
+    filter: drop-shadow(0 0 14px rgba(1, 172, 9, 0.75));
 }
 
-/* Tablettes / petits laptops */
 @media (max-width: 1024px) {
     #Logo_Mort_Pre {
         width: 230px;
@@ -27,7 +31,6 @@
     }
 }
 
-/* Tablette verticale */
 @media (max-width: 768px) {
     #Logo_Mort_Pre {
         width: 200px;
@@ -35,7 +38,6 @@
     }
 }
 
-/* Smartphones */
 @media (max-width: 480px) {
     #Logo_Mort_Pre {
         width: 70vw;
@@ -44,7 +46,7 @@
     }
 }
 
-/* --- Version petite du logo après génération de carte --- */
+/* Version petite après génération */
 #Logo_Mort_Pre.logo-small {
     width: 180px;
     margin-top: 8px;
@@ -63,58 +65,27 @@
     }
 }
 
-
 /* ===========================
-   BOUTONS (Générer / Hub)
+   BODY – fade-in
    =========================== */
 
-#boutonGenerer,
-#boutonHub {
-    padding: 14px 22px;
-    text-align: center;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 18px;
-    background-color: #000;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-top: 6px;
-    margin-bottom: 2px;
-    transition: background-color 0.3s, color 0.3s, transform 0.2s;
-    display: block;
-    width: fit-content;
-    max-width: 90vw;
+body {
+    background: rgb(0, 0, 0);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+    margin: 0;
+    padding-top: 10px;
+    opacity: 0;
+    animation: body-fade 0.7s ease-out forwards;
 }
 
-/* même hover pour les deux boutons */
-#boutonGenerer:hover,
-#boutonHub:hover {
-    background-color: #fff;
-    color: #000;
-    transform: scale(1.03);
+@keyframes body-fade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
 }
-
-/* Tablettes */
-@media (max-width: 768px) {
-    #boutonGenerer,
-    #boutonHub {
-        font-size: 16px;
-        padding: 12px 18px;
-        max-width: 70vw;
-    }
-}
-
-/* Smartphones */
-@media (max-width: 480px) {
-    #boutonGenerer,
-    #boutonHub {
-        font-size: 14px;
-        padding: 10px 14px;
-        max-width: 65vw;
-    }
-}
-
 
 /* ===========================
    BACKGROUND VIDÉO
@@ -130,6 +101,7 @@ video {
     height: auto;
     transform: translate(-50%, -50%);
     z-index: -1;
+    filter: brightness(0.9);
 }
 
 @media (max-width: 600px) {
@@ -139,22 +111,81 @@ video {
     }
 }
 
-
 /* ===========================
-   BODY
+   BOUTONS (Générer / Hub)
    =========================== */
 
-body {
-    background: black;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;   /* plus de centrage vertical forcé */
-    min-height: 100vh;             /* permet le scroll si la grille est grande */
-    margin: 0;
-    padding-top: 10px;
+#boutonGenerer,
+#boutonHub {
+    padding: 14px 22px;
+    text-align: center;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 18px;
+    background: radial-gradient(circle at top, #014212 0%, #000 55%);
+    color: #fff;
+    border: 1px solid #00ff2a;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 6px;
+    margin-bottom: 2px;
+    transition:
+        background 0.3s,
+        color 0.3s,
+        transform 0.2s,
+        box-shadow 0.3s;
+    display: block;
+    width: fit-content;
+    max-width: 90vw;
+    box-shadow: 0 0 10px rgba(0,0,0,0.7);
 }
 
+#boutonGenerer:hover,
+#boutonHub:hover {
+    background: radial-gradient(circle at top, #000000 0%, #00ff15 55%);
+    color: #ffffff;
+    transform: translateY(-6px) scale(1.03);
+    box-shadow: 0 0 14px rgba(204, 204, 204, 0.7);
+}
+
+@media (max-width: 768px) {
+    #boutonGenerer,
+    #boutonHub {
+        font-size: 16px;
+        padding: 12px 18px;
+        max-width: 70vw;
+    }
+}
+
+@media (max-width: 480px) {
+    #boutonGenerer,
+    #boutonHub {
+        font-size: 14px;
+        padding: 10px 14px;
+        max-width: 65vw;
+    }
+}
+
+/* ===========================
+   WRAPPER : grille + historique
+   =========================== */
+
+#main-wrapper {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
+    max-width: 980px;
+    padding: 10px 15px;
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+    #main-wrapper {
+        flex-direction: column;
+        align-items: center;
+    }
+}
 
 /* ===========================
    TABLE / GRILLE 4x3
@@ -171,32 +202,32 @@ table {
 
 /* Cases */
 td {
-    border: 7px solid #1d1c1c;
-    width: calc(100% / 3);   /* 3 colonnes */
+    border: 7px solid #252525;
+    width: calc(100% / 3);
     height: 118px;
     text-align: center;
     vertical-align: middle;
     cursor: pointer;
     position: relative;
     overflow: hidden;
-    background-color: #000;
+    background-color: #000000;
 }
 
 /* Images dans la grille */
 td img {
     width: 100%;
     height: 100%;
-    object-fit: contain;   /* on rentre l’image dans la case sans crop */
+    object-fit: contain;
     display: block;
-    transition: transform 1.5s ease;
+    transition: transform 1.5s ease, filter 0.3s ease;
 }
 
-/* Rotation sur sélection */
+/* Rotation + léger zoom sur sélection */
 .selected img {
-    transform: rotateY(360deg);
+    transform: rotateY(360deg) scale(1.04);
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.9));
 }
 
-/* Mobile : on ajuste un peu la hauteur */
 @media (max-width: 600px) {
     td {
         height: 120px;
@@ -208,7 +239,6 @@ td img {
         height: 100px;
     }
 }
-
 
 /* ===========================
    OVERLAYS BLEU / ROSE
@@ -223,27 +253,26 @@ td img {
     background-color: transparent;
     z-index: 2;
     display: none;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.25s ease;
 }
 
-/* case sélectionnée (homme ou femme) */
 .selected .overlay {
     display: block;
 }
 
 /* Homme = BLEU */
 .selected.male .overlay {
-    background-color: rgba(0, 123, 255, 0.45);
+    background-color: rgba(0, 123, 255, 0.75);
 }
 
 /* Femme = ROSE */
 .selected.female .overlay {
-    background-color: rgba(255, 0, 150, 0.45);
+    background-color: rgba(255, 0, 149, 0.527);
 }
 
-/* Logo "Bingo" par-dessus l’overlay (si tu veux garder) */
+/* Logo "Bingo" par-dessus l’overlay */
 .selected::before {
-    content: url('images/Bingo_confirme.png');
+    content: url('images/Bingo_confirme.webp');
     width: 100%;
     height: 100%;
     position: absolute;
@@ -252,6 +281,7 @@ td img {
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease-in-out;
+    z-index: 3;
 }
 
 .selected.show-logo::before {
@@ -289,33 +319,116 @@ td img {
     }
 }
 
+/* ===========================
+   PANNEAU HISTORIQUE DES MALUS
+   =========================== */
+
+#malus-panel {
+    display: none; /* 🔹 caché par défaut */
+    background: rgba(0, 0, 0, 0.85);
+    border: 1px solid #016b13;
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: #ffffff;
+    font-family: 'Courier New', Courier, monospace;
+    max-width: 340px;   /* 🔹 plus large pour les longs textes */
+    width: 100%;
+    box-shadow: 0 0 10px rgba(0,0,0,0.7);
+}
+
+#malus-panel h2 {
+    font-size: 18px;
+    margin: 0 0 8px;
+    text-align: left;
+    color: #00ff00;
+}
+
+#malus-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 260px;
+    overflow-y: auto;
+    font-size: 14px;
+}
+
+#malus-list li {
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    white-space: normal;        /* 🔹 laisse le texte aller à la ligne */
+    word-wrap: break-word;
+}
+
+#malus-list li:last-child {
+    border-bottom: none;
+}
+
+@media (max-width: 768px) {
+    #malus-panel {
+        max-width: 390px;
+    }
+    #malus-panel h2 {
+        text-align: center;
+    }
+}
+
 
 /* ===========================
-   MESSAGE MALUS
+   MESSAGE MALUS (popup)
    =========================== */
 
 #malus-message {
     position: fixed;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%) scale(0.8);
     font-size: 42px;
     text-align: center;
-    font-family: 'October Crow', 'Courier New', Courier, monospace;
+    font-family: 'Courier New', Courier, monospace;
     color: #ffffff;
-    background-color: rgba(0, 0, 0, 0.85);
+    background-color: rgba(0, 0, 0, 0.9);
     padding: 20px 30px;
     border: 2px solid #a00000;
     border-radius: 10px;
     display: none;
-    z-index: 10;
+    z-index: 50;
     max-width: 90vw;
+    opacity: 0;
+    text-shadow: 0 0 8px rgba(0,0,0,0.9);
 }
 
 @media (max-width: 600px) {
     #malus-message {
         font-size: 26px;
         padding: 15px 20px;
+    }
+}
+
+#malus-message.show {
+    animation:
+        malus-pop 0.25s ease-out forwards,
+        malus-glow 1.4s ease-in-out 0.25s infinite alternate;
+}
+
+@keyframes malus-pop {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.7);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+@keyframes malus-glow {
+    0% {
+        box-shadow: 0 0 6px rgba(160, 0, 0, 0.6);
+        border-color: #a00000;
+    }
+    100% {
+        box-shadow: 0 0 16px rgba(255, 0, 0, 0.9);
+        border-color: #ff0000;
     }
 }
 
@@ -329,20 +442,22 @@ td img {
     left: 50%;
     transform: translate(-50%, -50%) scale(0.8);
     font-size: 42px;
-    font-family: 'October Crow', 'Courier New', monospace;
-    color: #00ff88;
-    background-color: rgba(0, 0, 0, 0.85);
+    font-family: 'Courier New', monospace;
+    color: #00ff2a;
+    background-color: rgba(0, 0, 0, 0.92);
     padding: 20px 40px;
     border-radius: 12px;
     display: none;
     z-index: 60;
     text-align: center;
     opacity: 0;
+    text-shadow: 0 0 10px rgba(0, 255, 34, 0.9);
 }
 
-/* Classe ajoutée quand on affiche la victoire */
 #victory-message.show {
-    animation: victory-pop 0.6s ease-out forwards;
+    animation:
+        victory-pop 0.6s ease-out forwards,
+        victory-glow 1.8s ease-in-out 0.6s infinite alternate;
 }
 
 @keyframes victory-pop {
@@ -360,8 +475,14 @@ td img {
     }
 }
 
-
-
+@keyframes victory-glow {
+    0% {
+        box-shadow: 0 0 10px rgba(0, 255, 21, 0.6);
+    }
+    100% {
+        box-shadow: 0 0 22px rgba(0, 255, 21, 0.6);
+    }
+}
 
 /* ===========================
    RÉSEAUX SOCIAUX
@@ -377,10 +498,13 @@ td img {
     font-size: 40px;
     color: #ffffff;
     text-decoration: none;
+    transition: transform 0.2s ease, color 0.25s ease, text-shadow 0.25s ease;
 }
 
 .social-icon:hover {
-    color: #000000;
+    color: #00ff37;
+    transform: translateY(-2px) scale(1.1);
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
 }
 
 @media (max-width: 600px) {
