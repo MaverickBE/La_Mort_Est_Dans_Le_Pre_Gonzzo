@@ -82,6 +82,7 @@ let malusPool = [];
 let malusIndex = 0;
 let malusShownCount = 0;
 let victoryJustTriggered = false;
+let gameOver = false; // true une fois la victoire obtenue
 
 // file d’attente des malus à afficher
 let malusQueue = [];
@@ -133,6 +134,8 @@ function initMalusPool() {
     clearTimeout(malusTimeoutId);
     malusTimeoutId = null;
   }
+
+  gameOver = false; // ✅ nouvelle grille = nouvelle partie
 
   const box = document.getElementById("malus-message");
   if (box) {
@@ -259,6 +262,7 @@ function maybeAssignMalus(cell) {
   if (malusShownCount >= MAX_MALUS_PER_GRID) {
     cell.dataset.malusAssigned = "1";
     victoryJustTriggered = true;
+    gameOver = true; // ✅ à partir de là, plus aucun clic ne doit marcher
     showVictoryMessage();
     return;
   }
@@ -332,6 +336,11 @@ function genererNouvelleCarte() {
       cell.appendChild(img);
       cell.appendChild(overlay);
 
+      // ✨ animation d'apparition avec un léger décalage (effet wave)
+      const order = i * GRID_COLS + j;          // ordre de la case dans la grille
+      cell.classList.add("cell-appear");
+      cell.style.animationDelay = `${order * 80}ms`;
+
       if (!isCenter) {
         cell.addEventListener("click", function () {
           toggleSelected(this);
@@ -351,24 +360,31 @@ function genererNouvelleCarte() {
 // ============================
 
 function toggleSelected(cell) {
-  const wasSelected = cell.classList.contains("selected");
-
-  if (wasSelected) {
-    cell.classList.remove("selected");
-    console.log("Case unselected");
-  } else {
-    cell.classList.add("selected");
-    console.log("Case selected");
-    maybeAssignMalus(cell);
+  // 🎮 Si la partie est terminée, on ignore tous les clics
+  if (gameOver) {
+    return;
   }
 
-  // si victoire → pas de son bingo
+  // ❌ Si la case est déjà cochée, on ne peut plus la décocher
+  if (cell.classList.contains("selected")) {
+    return;
+  }
+
+  // ✔ Première fois qu’elle est cochée
+  cell.classList.add("selected");
+  console.log("Case selected");
+  maybeAssignMalus(cell);
+
+  // 👉 Si ce n’est pas une victoire, on joue le son bingo
   if (!victoryJustTriggered) {
     jouerSonBingo();
   } else {
+    // La victoire vient d’être déclenchée, on ne rejoue pas le son bingo
     victoryJustTriggered = false;
   }
 }
+
+
 
 function jouerSonBingo() {
   const audio = document.getElementById("bingoSound");

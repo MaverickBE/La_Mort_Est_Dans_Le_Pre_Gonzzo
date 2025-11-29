@@ -213,6 +213,42 @@ td {
     background-color: #000000;
 }
 
+/* Case déjà cochée : curseur d'interdiction */
+td.selected {
+    cursor: not-allowed;
+}
+
+/* Et on enlève l'effet hover sur les cases déjà cochées */
+@media (hover: hover) {
+    td.selected:hover {
+        transform: none;
+        box-shadow: none;
+    }
+}
+
+
+/* ✨ Apparition progressive des cases quand la carte est générée */
+td.cell-appear {
+    opacity: 0;
+    animation: cell-pop 0.15s ease-out forwards;
+}
+
+@keyframes cell-pop {
+    0% {
+        opacity: 0;
+        transform: scale(1.5) translateY(8px);
+    }
+    70% {
+        opacity: 1;
+        transform: scale(1.10) translateY(0);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+
 /* Images dans la grille */
 td img {
     width: 100%;
