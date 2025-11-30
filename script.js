@@ -90,27 +90,77 @@ let gameOver = false;
 let malusCount = 0;
 let bonusHistCount = 0;
 
-// timer pour fermer le popup (plus de file d’attente)
+// ancienne logique de file — on garde les var pour éviter toute erreur
+let malusQueue = [];
+let malusDisplaying = false;
+
+// timer pour fermer le popup
 let malusTimeoutId = null;
+
+// ============================
+//   PANEL HISTORIQUE (no-op pour l’instant)
+// ============================
+
+function hideMalusPanel() {
+  // on ne l’utilise plus vraiment, mais on la garde pour éviter les erreurs
+  const panel = document.getElementById("malus-panel");
+  if (panel) panel.style.display = "none";
+}
 
 // ============================
 //   GESTION POOL
 // ============================
 
 function initMalusPool() {
-  // 9 malus aléatoires
-  const shuffledMalus = shuffle([...MALUS_LIST]);
-  const chosenMalus = shuffledMalus
-    .slice(0, 9)
-    .map(t => ({ text: t, type: "malus" }));
+  // 🔴 Les deux malus qui ne doivent jamais tomber ensemble
+  const EXCLUSIVE_A = "Objets électroniques interdit";
+  const EXCLUSIVE_B = "Objets non électro. interdit";
 
-  // 1 bonus aléatoire
+  // On mélange tous les malus
+  const shuffledMalus = shuffle([...MALUS_LIST]);
+
+  const chosenMalus = [];
+  let hasExclusiveAlready = false;
+
+  // On parcourt la liste mélangée et on construit chosenMalus
+  for (const text of shuffledMalus) {
+    if (chosenMalus.length >= 9) break;
+
+    if (text === EXCLUSIVE_A || text === EXCLUSIVE_B) {
+      // Si on a déjà pris l'un des deux, on SKIP l'autre
+      if (hasExclusiveAlready) continue;
+
+      hasExclusiveAlready = true;
+      chosenMalus.push({ text, type: "malus" });
+    } else {
+      chosenMalus.push({ text, type: "malus" });
+    }
+  }
+
+  // Sécurité : compléter à 9 si besoin
+  if (chosenMalus.length < 9) {
+    for (const text of shuffledMalus) {
+      if (chosenMalus.length >= 9) break;
+      if (chosenMalus.some((e) => e.text === text)) continue;
+
+      if (hasExclusiveAlready && (text === EXCLUSIVE_A || text === EXCLUSIVE_B)) {
+        continue;
+      }
+
+      chosenMalus.push({ text, type: "malus" });
+    }
+  }
+
+  // 🟢 1 bonus aléatoire
   const bonusText = BONUS_LIST[Math.floor(Math.random() * BONUS_LIST.length)];
   const bonusEntry = { text: bonusText, type: "bonus" };
 
-  // 9 malus + 1 bonus mélangés
+  // 9 malus + 1 bonus, mélangés
   malusPool = shuffle([...chosenMalus, bonusEntry]);
 
+  // ======================
+  // 🧹 Reset des états
+  // ======================
   malusIndex = 0;
   malusShownCount = 0;
   bonusCount = 0;
@@ -119,6 +169,9 @@ function initMalusPool() {
 
   malusCount = 0;
   bonusHistCount = 0;
+
+  malusQueue = [];
+  malusDisplaying = false;
 
   if (malusTimeoutId) {
     clearTimeout(malusTimeoutId);
@@ -131,11 +184,10 @@ function initMalusPool() {
     box.classList.remove("show", "effect-malus", "effect-bonus");
   }
 
-  // reset historique
   const hist = document.getElementById("historique-malus");
   const list = document.getElementById("liste-malus");
   if (hist && list) {
-    hist.style.display = "none";
+    hist.style.visibility = "hidden";  // 👈 on cache visuellement mais garde la place
     list.innerHTML = "";
   }
 }
@@ -188,7 +240,7 @@ function addEffectToHistory(effect) {
   const list = document.getElementById("liste-malus");
   if (!hist || !list) return;
 
-  hist.style.display = "block";
+  hist.style.visibility = "visible";
 
   const li = document.createElement("li");
 
@@ -235,9 +287,10 @@ function nettoyerGrilleApresVictoire() {
   const hist = document.getElementById("historique-malus");
   const list = document.getElementById("liste-malus");
   if (hist && list) {
-    hist.style.display = "none";
+    hist.style.visibility = "hidden";
     list.innerHTML = "";
   }
+
 
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -294,7 +347,7 @@ function maybeAssignMalus(cell) {
 
   if (malusIndex >= malusPool.length) return;
 
-  const effect = malusPool[malusIndex++];   // { text, type }
+  const effect = malusPool[malusIndex++]; // { text, type }
 
   if (effect.type === "bonus") {
     bonusCount++;
@@ -382,17 +435,17 @@ function genererNouvelleCarte() {
 // ============================
 
 function jouerCriHomme() {
-    const audio = document.getElementById("maleSound");
-    if (!audio) return;
-    audio.volume = 0.20;
-    audio.play();
+  const audio = document.getElementById("maleSound");
+  if (!audio) return;
+  audio.volume = 0.2;
+  audio.play();
 }
 
 function jouerCriFemme() {
-    const audio = document.getElementById("femaleSound");
-    if (!audio) return;
-    audio.volume = 0.20;
-    audio.play();
+  const audio = document.getElementById("femaleSound");
+  if (!audio) return;
+  audio.volume = 0.2;
+  audio.play();
 }
 
 function toggleSelected(cell) {
@@ -405,18 +458,15 @@ function toggleSelected(cell) {
   console.log("Case selected");
   maybeAssignMalus(cell);
 
-  // 👉 Son selon homme/femme
+  // 👉 Son selon homme/femme (sauf si victoire)
   if (!victoryJustTriggered) {
-
-      if (cell.classList.contains("male")) {
-          jouerCriHomme();
-      } 
-      else if (cell.classList.contains("female")) {
-          jouerCriFemme();
-      }
-
+    if (cell.classList.contains("male")) {
+      jouerCriHomme();
+    } else if (cell.classList.contains("female")) {
+      jouerCriFemme();
+    }
   } else {
-      victoryJustTriggered = false;
+    victoryJustTriggered = false;
   }
 }
 
