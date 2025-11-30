@@ -381,6 +381,20 @@ function genererNouvelleCarte() {
 //   SÉLECTION / SON
 // ============================
 
+function jouerCriHomme() {
+    const audio = document.getElementById("maleSound");
+    if (!audio) return;
+    audio.volume = 0.20;
+    audio.play();
+}
+
+function jouerCriFemme() {
+    const audio = document.getElementById("femaleSound");
+    if (!audio) return;
+    audio.volume = 0.20;
+    audio.play();
+}
+
 function toggleSelected(cell) {
   if (gameOver) return;
 
@@ -391,18 +405,19 @@ function toggleSelected(cell) {
   console.log("Case selected");
   maybeAssignMalus(cell);
 
+  // 👉 Son selon homme/femme
   if (!victoryJustTriggered) {
-    jouerSonBingo();
-  } else {
-    victoryJustTriggered = false;
-  }
-}
 
-function jouerSonBingo() {
-  const audio = document.getElementById("bingoSound");
-  if (!audio) return;
-  audio.volume = 0.2;
-  audio.play();
+      if (cell.classList.contains("male")) {
+          jouerCriHomme();
+      } 
+      else if (cell.classList.contains("female")) {
+          jouerCriFemme();
+      }
+
+  } else {
+      victoryJustTriggered = false;
+  }
 }
 
 function jouerSonVictoire() {
