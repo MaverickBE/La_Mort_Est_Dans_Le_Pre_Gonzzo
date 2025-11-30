@@ -1,5 +1,5 @@
 /* ===========================
-   LOGO "La Mort est dans le pré"
+   LOGO
    =========================== */
 
 #Logo_Mort_Pre {
@@ -112,7 +112,7 @@ video {
 }
 
 /* ===========================
-   BOUTONS (Générer / Hub)
+   BOUTONS
    =========================== */
 
 #boutonGenerer,
@@ -200,7 +200,6 @@ table {
     margin-top: 10px;
 }
 
-/* Cases */
 td {
     border: 7px solid #252525;
     width: calc(100% / 3);
@@ -218,16 +217,7 @@ td.selected {
     cursor: not-allowed;
 }
 
-/* Et on enlève l'effet hover sur les cases déjà cochées */
-@media (hover: hover) {
-    td.selected:hover {
-        transform: none;
-        box-shadow: none;
-    }
-}
-
-
-/* ✨ Apparition progressive des cases quand la carte est générée */
+/* ✨ Apparition progressive des cases */
 td.cell-appear {
     opacity: 0;
     animation: cell-pop 0.15s ease-out forwards;
@@ -248,8 +238,6 @@ td.cell-appear {
     }
 }
 
-
-/* Images dans la grille */
 td img {
     width: 100%;
     height: 100%;
@@ -356,61 +344,78 @@ td img {
 }
 
 /* ===========================
-   PANNEAU HISTORIQUE DES MALUS
+   HISTORIQUE MALUS / BONUS
    =========================== */
 
-#malus-panel {
-    display: none; /* 🔹 caché par défaut */
-    background: rgba(0, 0, 0, 0.85);
-    border: 1px solid #016b13;
+/* Encadré général */
+.historique-malus {
+    display: none;
+    margin-top: 100px;
+    margin-left: 10px;
+    padding: 8px;
+    border: 2px solid #ffffff;
     border-radius: 8px;
-    padding: 10px 14px;
-    color: #ffffff;
-    font-family: 'Courier New', Courier, monospace;
-    max-width: 340px;   /* 🔹 plus large pour les longs textes */
-    width: 100%;
-    box-shadow: 0 0 10px rgba(0,0,0,0.7);
+    background-color: rgba(0, 0, 0, 0.85);
+    color: #fff;
+    font-family: 'Courier New', monospace;
+    /* ❌ plus de max-height ici */
+    width: 420px;
+    max-width: 90vw;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
 }
 
-#malus-panel h2 {
+/* Titre */
+.historique-titre {
+    font-weight: bold;
     font-size: 18px;
-    margin: 0 0 8px;
-    text-align: left;
-    color: #00ff00;
+    margin-bottom: 10px;
+    color: #ffffff;
+    text-align: center;
 }
 
-#malus-list {
+/* Contenu : on enlève la hauteur max + scroll */
+.historique-contenu {
+    /* ❌ max-height: 220px; */
+    /* ❌ overflow-y: auto; */
+    max-height: none;
+    overflow-y: visible;
+    padding-right: 4px;
+}
+
+.historique-contenu ul {
     list-style: none;
-    padding: 0;
+    padding-left: 0;
     margin: 0;
-    max-height: 260px;
-    overflow-y: auto;
-    font-size: 14px;
+    font-size: 16px;
+    line-height: 1.35;
 }
 
-#malus-list li {
-    padding: 4px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    white-space: normal;        /* 🔹 laisse le texte aller à la ligne */
-    word-wrap: break-word;
+/* Lignes malus/bonus qui se réajustent sur plusieurs lignes si besoin */
+.historique-contenu li {
+    margin-bottom: 6px;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
 }
 
-#malus-list li:last-child {
-    border-bottom: none;
+.historique-contenu li.malus {
+    color: #ff4b4b;
 }
 
+.historique-contenu li.bonus {
+    color: #00ff6a;
+}
+
+/* Sur mobile : mettre l'historique sous la grille */
 @media (max-width: 768px) {
-    #malus-panel {
-        max-width: 390px;
-    }
-    #malus-panel h2 {
-        text-align: center;
+    .historique-malus {
+        width: 90vw;
+        margin-left: 0;
     }
 }
-
 
 /* ===========================
-   MESSAGE MALUS (popup)
+   POPUP MALUS / BONUS
    =========================== */
 
 #malus-message {
@@ -433,17 +438,18 @@ td img {
     text-shadow: 0 0 8px rgba(0,0,0,0.9);
 }
 
-@media (max-width: 600px) {
-    #malus-message {
-        font-size: 26px;
-        padding: 15px 20px;
-    }
+#malus-message.effect-malus {
+    border-color: #ff0000;
+    box-shadow: 0 0 16px rgba(255, 0, 0, 0.9);
+}
+
+#malus-message.effect-bonus {
+    border-color: #00ff6a;
+    box-shadow: 0 0 16px rgba(0, 255, 120, 0.9);
 }
 
 #malus-message.show {
-    animation:
-        malus-pop 0.25s ease-out forwards,
-        malus-glow 1.4s ease-in-out 0.25s infinite alternate;
+    animation: malus-pop 0.25s ease-out forwards;
 }
 
 @keyframes malus-pop {
@@ -457,14 +463,10 @@ td img {
     }
 }
 
-@keyframes malus-glow {
-    0% {
-        box-shadow: 0 0 6px rgba(160, 0, 0, 0.6);
-        border-color: #a00000;
-    }
-    100% {
-        box-shadow: 0 0 16px rgba(255, 0, 0, 0.9);
-        border-color: #ff0000;
+@media (max-width: 600px) {
+    #malus-message {
+        font-size: 26px;
+        padding: 15px 20px;
     }
 }
 

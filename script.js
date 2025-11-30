@@ -1,11 +1,6 @@
 // ============================
 //   LA MORT EST DANS LE PRÉ
-//   Grille 4 x 3 (12 cases)
-//   - 11 images mélangées
-//   - 1 image fixe au centre
-//   - Cases hommes = overlay BLEU
-//   - Cases femmes = overlay ROSE
-//   - 10 malus / grille, 11e case = victoire
+//   9 malus + 1 bonus, 11e case = victoire
 // ============================
 
 console.log("script Mort Est Dans Le Pré chargé");
@@ -37,7 +32,7 @@ const centerImage = {
   name: "Logo_Mort.png",
 };
 
-// --- HOMMES / FEMMES POUR LES COULEURS ---
+// --- HOMMES / FEMMES ---
 const FEMALE_IMAGES = new Set([
   "Faux2.webp",
   "Petite_Fille.webp",
@@ -50,7 +45,7 @@ function getGenderClass(imageName) {
 }
 
 // ============================
-//         MALUS
+//         MALUS / BONUS
 // ============================
 
 const MALUS_LIST = [
@@ -62,125 +57,153 @@ const MALUS_LIST = [
   "EMF interdit",
   "Thermo interdit",
   "Objets électroniques interdit",
-  "Objets non électroniques interdit",
+  "Objets non électro. interdit",
   "Pas d'encens",
   "Pas de crucifix",
   "50% de santé mentale",
-  "Sprint illimité",
   "Sold out",
   "Full T1",
   "Full T2",
   "Vitesse joueur 50%",
-  "Vitesse joueur 150%",
   "Pas de cachettes",
   "Disjoncteur cassé",
 ];
 
-const MAX_MALUS_PER_GRID = 10;
+const BONUS_LIST = [
+  "Sprint illimité",
+  "Vitesse joueur 150%",
+  "Pas de malus",
+  "Vitesse entité 50%",
+];
+
+const MAX_EFFECTS_PER_GRID = 10; // 9 malus + 1 bonus
 
 let malusPool = [];
 let malusIndex = 0;
-let malusShownCount = 0;
-let victoryJustTriggered = false;
-let gameOver = false; // true une fois la victoire obtenue
 
-// file d’attente des malus à afficher
-let malusQueue = [];
-let malusDisplaying = false;
+let malusShownCount = 0;
+let bonusCount = 0;
+let victoryJustTriggered = false;
+let gameOver = false;
+
+// Compteurs pour l'historique
+let malusCount = 0;
+let bonusHistCount = 0;
+
+// timer pour fermer le popup (plus de file d’attente)
 let malusTimeoutId = null;
 
-function showMalusPanel() {
-  const panel = document.getElementById("malus-panel");
-  if (panel) panel.style.display = "block";
-}
-
-function hideMalusPanel() {
-  const panel = document.getElementById("malus-panel");
-  if (panel) panel.style.display = "none";
-}
-
-
 // ============================
-//   HISTORIQUE DES MALUS
-// ============================
-
-function resetMalusHistorique() {
-  const ul = document.getElementById("malus-list");
-  if (ul) {
-    ul.innerHTML = "";
-  }
-}
-
-function ajouterMalusHistorique(text) {
-  const ul = document.getElementById("malus-list");
-  if (!ul) return;
-
-  const li = document.createElement("li");
-  li.textContent = `Malus ${malusShownCount} : ${text}`;
-  ul.appendChild(li);
-}
-
-// ============================
-//   GESTION MALUS POPUP
+//   GESTION POOL
 // ============================
 
 function initMalusPool() {
-  malusPool = shuffle([...MALUS_LIST]);
+  // 9 malus aléatoires
+  const shuffledMalus = shuffle([...MALUS_LIST]);
+  const chosenMalus = shuffledMalus
+    .slice(0, 9)
+    .map(t => ({ text: t, type: "malus" }));
+
+  // 1 bonus aléatoire
+  const bonusText = BONUS_LIST[Math.floor(Math.random() * BONUS_LIST.length)];
+  const bonusEntry = { text: bonusText, type: "bonus" };
+
+  // 9 malus + 1 bonus mélangés
+  malusPool = shuffle([...chosenMalus, bonusEntry]);
+
   malusIndex = 0;
   malusShownCount = 0;
-  malusQueue = [];
-  malusDisplaying = false;
+  bonusCount = 0;
+  gameOver = false;
+  victoryJustTriggered = false;
+
+  malusCount = 0;
+  bonusHistCount = 0;
+
   if (malusTimeoutId) {
     clearTimeout(malusTimeoutId);
     malusTimeoutId = null;
   }
 
-  gameOver = false; // ✅ nouvelle grille = nouvelle partie
-
   const box = document.getElementById("malus-message");
   if (box) {
     box.style.display = "none";
-    box.classList.remove("show");
+    box.classList.remove("show", "effect-malus", "effect-bonus");
   }
 
-  // reset historique pour la nouvelle grille
-  resetMalusHistorique();
-
-  // 🔹 on cache le panneau au début de la game
-  hideMalusPanel();
-}
-
-// Ajoute un malus à la file d'affichage (popup centrale)
-function showMalusMessage(text) {
-  malusQueue.push(text);
-  if (!malusDisplaying) {
-    displayNextMalus();
+  // reset historique
+  const hist = document.getElementById("historique-malus");
+  const list = document.getElementById("liste-malus");
+  if (hist && list) {
+    hist.style.display = "none";
+    list.innerHTML = "";
   }
 }
 
-function displayNextMalus() {
+// ============================
+//   POPUP MALUS/BONUS (instantané)
+// ============================
+
+function showMalusMessage(effect) {
   const box = document.getElementById("malus-message");
   if (!box) return;
 
-  if (malusQueue.length === 0) {
-    malusDisplaying = false;
-    box.classList.remove("show");
-    box.style.display = "none";
-    return;
+  // on met d'abord à jour l'historique
+  addEffectToHistory(effect);
+
+  // on annule le timer précédent (si le joueur spam)
+  if (malusTimeoutId) {
+    clearTimeout(malusTimeoutId);
+    malusTimeoutId = null;
   }
 
-  malusDisplaying = true;
-  const text = malusQueue.shift();
-
-  box.textContent = text;
+  // contenu + affichage
+  box.textContent = effect.text;
   box.style.display = "block";
-  box.classList.remove("show");
-  void box.offsetWidth; // reflow
-  box.classList.add("show");
 
+  // reset des classes + reflow pour relancer l'anim
+  box.classList.remove("show", "effect-malus", "effect-bonus");
+  void box.offsetWidth;
+
+  // couleur selon type
+  box.classList.add(
+    effect.type === "bonus" ? "effect-bonus" : "effect-malus",
+    "show"
+  );
+
+  // timer pour cacher automatiquement après 2,5s
   malusTimeoutId = setTimeout(() => {
-    displayNextMalus();
-  }, 5000);
+    box.classList.remove("show");
+    box.style.display = "none";
+    malusTimeoutId = null;
+  }, 2500);
+}
+
+// ============================
+//   HISTORIQUE
+// ============================
+
+function addEffectToHistory(effect) {
+  const hist = document.getElementById("historique-malus");
+  const list = document.getElementById("liste-malus");
+  if (!hist || !list) return;
+
+  hist.style.display = "block";
+
+  const li = document.createElement("li");
+
+  if (effect.type === "bonus") {
+    bonusHistCount++;
+    li.textContent = `Bonus ${bonusHistCount} : ${effect.text}`;
+    li.classList.add("bonus");
+  } else {
+    malusCount++;
+    li.textContent = `Malus ${malusCount} : ${effect.text}`;
+    li.classList.add("malus");
+  }
+
+  list.appendChild(li);
+  hist.scrollTop = hist.scrollHeight;
 }
 
 // ============================
@@ -196,11 +219,9 @@ function nettoyerGrilleApresVictoire() {
   const malusBox = document.getElementById("malus-message");
   if (malusBox) {
     malusBox.style.display = "none";
-    malusBox.classList.remove("show");
+    malusBox.classList.remove("show", "effect-malus", "effect-bonus");
   }
 
-  malusQueue = [];
-  malusDisplaying = false;
   if (malusTimeoutId) {
     clearTimeout(malusTimeoutId);
     malusTimeoutId = null;
@@ -211,10 +232,14 @@ function nettoyerGrilleApresVictoire() {
     logoMort.classList.remove("logo-small");
   }
 
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  const hist = document.getElementById("historique-malus");
+  const list = document.getElementById("liste-malus");
+  if (hist && list) {
+    hist.style.display = "none";
+    list.innerHTML = "";
+  }
 
-  // 🔹 panneau historique caché après la game
-  hideMalusPanel();
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function showVictoryMessage() {
@@ -223,19 +248,16 @@ function showVictoryMessage() {
 
   if (!box) return;
 
-  // stop malus
-  malusQueue = [];
-  malusDisplaying = false;
+  // arrêter proprement le popup
   if (malusTimeoutId) {
     clearTimeout(malusTimeoutId);
     malusTimeoutId = null;
   }
   if (malusBox) {
     malusBox.style.display = "none";
-    malusBox.classList.remove("show");
+    malusBox.classList.remove("show", "effect-malus", "effect-bonus");
   }
 
-  // son de victoire
   jouerSonVictoire();
 
   box.textContent = "🎉 Félicitations 🎉";
@@ -252,41 +274,42 @@ function showVictoryMessage() {
 }
 
 // ============================
-//   MALUS SUR CASE
+//   MALUS / BONUS SUR CASE
 // ============================
 
 function maybeAssignMalus(cell) {
   if (cell.dataset.malusAssigned === "1") return;
+  if (gameOver) return;
 
-  // si on a déjà donné 10 malus, la prochaine case cochée => victoire
-  if (malusShownCount >= MAX_MALUS_PER_GRID) {
+  const totalEffects = malusShownCount + bonusCount;
+
+  // déjà 10 effets → la case actuelle fait gagner
+  if (totalEffects >= MAX_EFFECTS_PER_GRID) {
     cell.dataset.malusAssigned = "1";
     victoryJustTriggered = true;
-    gameOver = true; // ✅ à partir de là, plus aucun clic ne doit marcher
+    gameOver = true;
     showVictoryMessage();
     return;
   }
 
   if (malusIndex >= malusPool.length) return;
 
-  const malusText = malusPool[malusIndex];
-  malusIndex++;
-  malusShownCount++;
+  const effect = malusPool[malusIndex++];   // { text, type }
+
+  if (effect.type === "bonus") {
+    bonusCount++;
+  } else {
+    malusShownCount++;
+  }
 
   cell.dataset.malusAssigned = "1";
 
-  // 🔹 dès qu'on a un premier malus, on affiche le panneau historique
-  showMalusPanel();
-
-  // popup centrale
-  showMalusMessage(malusText);
-  // historique à droite / en bas
-  ajouterMalusHistorique(malusText);
+  // popup + historique instantanés
+  showMalusMessage(effect);
 }
 
-
 // ============================
-//       GÉNÉRATION CARTE
+//   GÉNÉRATION CARTE
 // ============================
 
 function genererNouvelleCarte() {
@@ -336,8 +359,7 @@ function genererNouvelleCarte() {
       cell.appendChild(img);
       cell.appendChild(overlay);
 
-      // ✨ animation d'apparition avec un léger décalage (effet wave)
-      const order = i * GRID_COLS + j;          // ordre de la case dans la grille
+      const order = i * GRID_COLS + j;
       cell.classList.add("cell-appear");
       cell.style.animationDelay = `${order * 80}ms`;
 
@@ -356,35 +378,25 @@ function genererNouvelleCarte() {
 }
 
 // ============================
-//       SÉLECTION / SON
+//   SÉLECTION / SON
 // ============================
 
 function toggleSelected(cell) {
-  // 🎮 Si la partie est terminée, on ignore tous les clics
-  if (gameOver) {
-    return;
-  }
+  if (gameOver) return;
 
-  // ❌ Si la case est déjà cochée, on ne peut plus la décocher
-  if (cell.classList.contains("selected")) {
-    return;
-  }
+  // une fois cochée, plus possible de la décocher
+  if (cell.classList.contains("selected")) return;
 
-  // ✔ Première fois qu’elle est cochée
   cell.classList.add("selected");
   console.log("Case selected");
   maybeAssignMalus(cell);
 
-  // 👉 Si ce n’est pas une victoire, on joue le son bingo
   if (!victoryJustTriggered) {
     jouerSonBingo();
   } else {
-    // La victoire vient d’être déclenchée, on ne rejoue pas le son bingo
     victoryJustTriggered = false;
   }
 }
-
-
 
 function jouerSonBingo() {
   const audio = document.getElementById("bingoSound");
@@ -423,5 +435,4 @@ function shuffle(array) {
 
 document.addEventListener("DOMContentLoaded", () => {
   // On attend le clic sur "Générer une carte"
-  // genererNouvelleCarte();
 });

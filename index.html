@@ -19,18 +19,15 @@
         <source src="videos/Video_Grafton.mp4" type="video/mp4">
     </video>
 
-    <!-- Son quand on clique sur une case -->
+    <!-- Sons -->
     <audio id="bingoSound" src="bruits/Rire_validation.mp3"></audio>
-
-    <!-- 🔊 Son de victoire (applaudissements) -->
     <audio id="victorySound" src="bruits/Applaudissements.mp3"></audio>
 
-    <!-- Bouton pour générer la carte -->
+    <!-- Boutons -->
     <button id="boutonGenerer" class="bouton-action" type="button" onclick="genererNouvelleCarte()">
         Générer une carte
     </button>
 
-    <!-- Bouton pour retourner au hub Gonzzo -->
     <button id="boutonHub"
             class="bouton-action"
             type="button"
@@ -38,19 +35,21 @@
         Retour au Hub Gonzzo
     </button>
 
-    <!-- WRAPPER : grille + historique malus -->
+    <!-- WRAPPER : grille + historique -->
     <div id="main-wrapper">
         <!-- Grille -->
         <table id="carte"></table>
 
-        <!-- Panneau historique des malus -->
-        <aside id="malus-panel">
-            <h2>Historique des malus</h2>
-            <ul id="malus-list"></ul>
-        </aside>
+        <!-- Historique malus / bonus -->
+        <div id="historique-malus" class="historique-malus">
+            <div class="historique-titre">Historique des Malus / Bonus</div>
+            <div class="historique-contenu">
+                <ul id="liste-malus"></ul>
+            </div>
+        </div>
     </div>
 
-    <!-- Message de malus (popup centrale) -->
+    <!-- Popup centrale malus / bonus -->
     <div id="malus-message"></div>
 
     <!-- Message de victoire -->
