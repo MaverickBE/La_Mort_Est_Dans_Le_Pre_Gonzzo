@@ -86,50 +86,34 @@ let bonusCount = 0;
 let victoryJustTriggered = false;
 let gameOver = false;
 
-// Compteurs pour l'historique
+// compteurs pour l'historique d'affichage
 let malusCount = 0;
 let bonusHistCount = 0;
-
-// ancienne logique de file — on garde les var pour éviter toute erreur
-let malusQueue = [];
-let malusDisplaying = false;
 
 // timer pour fermer le popup
 let malusTimeoutId = null;
 
 // ============================
-//   PANEL HISTORIQUE (no-op pour l’instant)
-// ============================
-
-function hideMalusPanel() {
-  // on ne l’utilise plus vraiment, mais on la garde pour éviter les erreurs
-  const panel = document.getElementById("malus-panel");
-  if (panel) panel.style.display = "none";
-}
-
-// ============================
-//   GESTION POOL
+//   GESTION POOL (avec exceptions)
 // ============================
 
 function initMalusPool() {
-  // 🔴 Les deux malus qui ne doivent jamais tomber ensemble
+  // Les deux malus qui ne doivent jamais tomber ensemble
   const EXCLUSIVE_A = "Objets électroniques interdit";
   const EXCLUSIVE_B = "Objets non électro. interdit";
 
-  // On mélange tous les malus
+  // Mélange de tous les malus
   const shuffledMalus = shuffle([...MALUS_LIST]);
 
   const chosenMalus = [];
   let hasExclusiveAlready = false;
 
-  // On parcourt la liste mélangée et on construit chosenMalus
+  // On construit une liste de 9 malus en respectant la règle d'exclusion
   for (const text of shuffledMalus) {
     if (chosenMalus.length >= 9) break;
 
     if (text === EXCLUSIVE_A || text === EXCLUSIVE_B) {
-      // Si on a déjà pris l'un des deux, on SKIP l'autre
-      if (hasExclusiveAlready) continue;
-
+      if (hasExclusiveAlready) continue; // on a déjà l'un des deux
       hasExclusiveAlready = true;
       chosenMalus.push({ text, type: "malus" });
     } else {
@@ -151,16 +135,14 @@ function initMalusPool() {
     }
   }
 
-  // 🟢 1 bonus aléatoire
+  // 1 bonus aléatoire
   const bonusText = BONUS_LIST[Math.floor(Math.random() * BONUS_LIST.length)];
   const bonusEntry = { text: bonusText, type: "bonus" };
 
-  // 9 malus + 1 bonus, mélangés
+  // 9 malus + 1 bonus mélangés
   malusPool = shuffle([...chosenMalus, bonusEntry]);
 
-  // ======================
-  // 🧹 Reset des états
-  // ======================
+  // Reset des états
   malusIndex = 0;
   malusShownCount = 0;
   bonusCount = 0;
@@ -169,9 +151,6 @@ function initMalusPool() {
 
   malusCount = 0;
   bonusHistCount = 0;
-
-  malusQueue = [];
-  malusDisplaying = false;
 
   if (malusTimeoutId) {
     clearTimeout(malusTimeoutId);
@@ -187,43 +166,41 @@ function initMalusPool() {
   const hist = document.getElementById("historique-malus");
   const list = document.getElementById("liste-malus");
   if (hist && list) {
-    hist.style.visibility = "hidden";  // 👈 on cache visuellement mais garde la place
+    hist.style.visibility = "hidden";  // on cache visuellement mais on garde la place
     list.innerHTML = "";
   }
 }
 
 // ============================
-//   POPUP MALUS/BONUS (instantané)
+//   POPUP MALUS/BONUS
 // ============================
 
 function showMalusMessage(effect) {
   const box = document.getElementById("malus-message");
   if (!box) return;
 
-  // on met d'abord à jour l'historique
+  // d'abord l'historique
   addEffectToHistory(effect);
 
-  // on annule le timer précédent (si le joueur spam)
+  // on annule un éventuel timer précédent
   if (malusTimeoutId) {
     clearTimeout(malusTimeoutId);
     malusTimeoutId = null;
   }
 
-  // contenu + affichage
   box.textContent = effect.text;
   box.style.display = "block";
 
-  // reset des classes + reflow pour relancer l'anim
+  // reset des classes + reflow
   box.classList.remove("show", "effect-malus", "effect-bonus");
   void box.offsetWidth;
 
-  // couleur selon type
   box.classList.add(
     effect.type === "bonus" ? "effect-bonus" : "effect-malus",
     "show"
   );
 
-  // timer pour cacher automatiquement après 2,5s
+  // disparition auto après 2,5s
   malusTimeoutId = setTimeout(() => {
     box.classList.remove("show");
     box.style.display = "none";
@@ -291,7 +268,6 @@ function nettoyerGrilleApresVictoire() {
     list.innerHTML = "";
   }
 
-
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -301,7 +277,6 @@ function showVictoryMessage() {
 
   if (!box) return;
 
-  // arrêter proprement le popup
   if (malusTimeoutId) {
     clearTimeout(malusTimeoutId);
     malusTimeoutId = null;
@@ -336,7 +311,7 @@ function maybeAssignMalus(cell) {
 
   const totalEffects = malusShownCount + bonusCount;
 
-  // déjà 10 effets → la case actuelle fait gagner
+  // déjà 10 effets → cette case déclenche la victoire
   if (totalEffects >= MAX_EFFECTS_PER_GRID) {
     cell.dataset.malusAssigned = "1";
     victoryJustTriggered = true;
@@ -458,7 +433,7 @@ function toggleSelected(cell) {
   console.log("Case selected");
   maybeAssignMalus(cell);
 
-  // 👉 Son selon homme/femme (sauf si victoire)
+  // Son selon homme/femme (sauf si victoire)
   if (!victoryJustTriggered) {
     if (cell.classList.contains("male")) {
       jouerCriHomme();

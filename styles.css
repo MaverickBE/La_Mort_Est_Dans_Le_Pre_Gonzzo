@@ -189,12 +189,11 @@ video {
 
 /* wrapper de la grille : on réserve la place et on positionne les popups par-rapport à lui */
 #grid-wrapper {
-  position: relative;          /* <- important : les popups absolutes seront relatifs à ce bloc */
-  width: 100%;
-  max-width: 390px;            /* garder la même largeur que ta grille */
-  margin-top: 10px;
+    position: relative;
+    width: 100%;
+    max-width: 390px;
+    margin-top: 10px;
 }
-
 
 /* ===========================
    TABLE / GRILLE 4x3
@@ -356,9 +355,7 @@ td img {
    HISTORIQUE MALUS / BONUS
    =========================== */
 
-/* Encadré général */
 .historique-malus {
-    /* 👇 ON RÉSERVE TOUJOURS LA PLACE */
     visibility: hidden;          /* invisible au début, mais garde la place */
     margin-top: 10px;
     margin-left: 10px;
@@ -369,22 +366,20 @@ td img {
     color: #fff;
     font-family: 'Courier New', monospace;
     height: auto;
-    width: 420px;               /* largeur fixe = position de la grille stable */
+    width: 420px;                /* largeur fixe = position de la grille stable */
     max-width: 90vw;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
     overflow: visible;
 }
 
-/* Titre de l'historique */
 .historique-titre {
     font-weight: bold;
     font-size: 18px;
     margin-bottom: 10px;
     color: #ffffff;
-    text-align: center;         /* centré comme tu voulais */
+    text-align: center;
 }
 
-/* Conteneur scrollable */
 .historique-contenu {
     height: auto;
     overflow-y: visible;
@@ -394,20 +389,18 @@ td img {
 .historique-contenu ul {
     list-style: none;
     padding-left: 0;
-    line-height: 1.35; /* plus lisible */
+    line-height: 1.35;
     margin: 0;
-    font-size: 16px;            /* taille lisible */
+    font-size: 16px;
 }
 
-/* Ligne de malus / bonus */
 .historique-contenu li {
     margin-bottom: 6px;
-    white-space: normal;      /* 👉 lines wrap normally */
+    white-space: normal;
     overflow: visible;
     text-overflow: unset;
 }
 
-/* Couleurs selon type */
 .historique-contenu li.malus {
     color: #ff4b4b;
 }
@@ -416,7 +409,6 @@ td img {
     color: #00ff6a;
 }
 
-/* Sur mobile : mettre l'historique sous la grille, full largeur */
 @media (max-width: 768px) {
     .historique-malus {
         width: 90vw;
@@ -437,7 +429,7 @@ td img {
     pointer-events: none;
     font-size: 30px;
     text-align: center;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: 'Courier New', monospace;
     color: #ffffff;
     background-color: rgba(0, 0, 0, 0.9);
     padding: 20px 30px;
@@ -503,16 +495,15 @@ td img {
     text-shadow: 0 0 10px rgba(0, 255, 34, 0.9);
 }
 
-/* si tu veux aussi centrer la popup victoire sur la grille */
+/* classe utilitaire déjà présente dans le HTML */
 .grid-victory {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0.9);
-  z-index: 45;
-  display: none;
-  pointer-events: none;
-  /* style similaire que #malus-message ou personnalisé */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    z-index: 45;
+    display: none;
+    pointer-events: none;
 }
 
 #victory-message.show {

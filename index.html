@@ -12,16 +12,14 @@
     
     <a href="https://maverickbe.github.io/La_Mort_Est_Dans_Le_Pre_Gonzzo/">
         <img 
-        id="Logo_Mort_Pre" 
-        src="images/La_Mort_Est_Dans_Le_Pre.webp" 
-        alt="Logo_Mort_Pre">
+            id="Logo_Mort_Pre" 
+            src="images/La_Mort_Est_Dans_Le_Pre.webp" 
+            alt="Logo_Mort_Pre">
     </a>
 
     <!-- Vidéo de fond -->
     <video autoplay muted loop playsinline poster="images/Fond_site_secours.png"> 
-        <source 
-        src="videos/Video_Grafton.mp4"
-        type="video/mp4">
+        <source src="videos/Video_Grafton.mp4" type="video/mp4">
     </video>
 
     <!-- Sons spécifiques homme / femme & victoire -->
@@ -30,41 +28,43 @@
     <audio id="victorySound" src="bruits/Applaudissements.mp3"></audio>
 
     <!-- Boutons -->
-    <button id="boutonGenerer" 
-            class="bouton-action" 
-            type="button" 
+    <button id="boutonGenerer"
+            class="bouton-action"
+            type="button"
             onclick="genererNouvelleCarte()">
-            Générer une carte
+        Générer une carte
     </button>
 
     <button id="boutonHub"
             class="bouton-action"
             type="button"
             onclick="window.location.href='https://maverickbe.github.io/Hub-Gonzzo/';">
-            Retour au Hub Gonzzo
+        Retour au Hub Gonzzo
     </button>
 
     <!-- WRAPPER : grille + historique malus -->
     <div id="main-wrapper">
-    <!-- GRID WRAPPER : contient la grille et les popups qui seront affichés au-dessus -->
-    <div id="grid-wrapper">
-        <!-- Grille -->
-        <table id="carte"></table>
 
-        <!-- Message de malus (popup localisé sur la grille) -->
-        <div id="malus-message" role="status" aria-live="polite"></div>
+        <!-- GRID WRAPPER : contient la grille et les popups qui seront affichés au-dessus -->
+        <div id="grid-wrapper">
+            <!-- Grille -->
+            <table id="carte"></table>
 
-        <!-- Message de victoire (optionnel : aussi localisé sur la grille) -->
-        <div id="victory-message" class="grid-victory" role="status" aria-live="polite"></div>
-    </div>
+            <!-- Message de malus (popup localisé sur la grille) -->
+            <div id="malus-message" role="status" aria-live="polite"></div>
 
-    <!-- Historique malus / bonus (reste à droite sur desktop, en bas sur mobile) -->
-    <div id="historique-malus" class="historique-malus">
-        <div class="historique-titre">Historique des Malus / Bonus</div>
-        <div class="historique-contenu">
-        <ul id="liste-malus"></ul>
+            <!-- Message de victoire (localisé sur la grille) -->
+            <div id="victory-message" class="grid-victory" role="status" aria-live="polite"></div>
         </div>
-    </div>
+
+        <!-- Historique malus / bonus -->
+        <div id="historique-malus" class="historique-malus">
+            <div class="historique-titre">Historique des Malus / Bonus</div>
+            <div class="historique-contenu">
+                <ul id="liste-malus"></ul>
+            </div>
+        </div>
+
     </div>
 
     <!-- Réseaux sociaux -->
