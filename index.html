@@ -44,25 +44,28 @@
             Retour au Hub Gonzzo
     </button>
 
-    <!-- WRAPPER : grille + historique -->
+    <!-- WRAPPER : grille + historique malus -->
     <div id="main-wrapper">
+    <!-- GRID WRAPPER : contient la grille et les popups qui seront affichés au-dessus -->
+    <div id="grid-wrapper">
         <!-- Grille -->
         <table id="carte"></table>
 
-        <!-- Historique malus / bonus -->
-        <div id="historique-malus" class="historique-malus">
-            <div class="historique-titre">Historique des Malus / Bonus</div>
-            <div class="historique-contenu">
-                <ul id="liste-malus"></ul>
-            </div>
-        </div>
+        <!-- Message de malus (popup localisé sur la grille) -->
+        <div id="malus-message" role="status" aria-live="polite"></div>
+
+        <!-- Message de victoire (optionnel : aussi localisé sur la grille) -->
+        <div id="victory-message" class="grid-victory" role="status" aria-live="polite"></div>
     </div>
 
-    <!-- Popup centrale malus / bonus -->
-    <div id="malus-message"></div>
-
-    <!-- Message de victoire -->
-    <div id="victory-message"></div>
+    <!-- Historique malus / bonus (reste à droite sur desktop, en bas sur mobile) -->
+    <div id="historique-malus" class="historique-malus">
+        <div class="historique-titre">Historique des Malus / Bonus</div>
+        <div class="historique-contenu">
+        <ul id="liste-malus"></ul>
+        </div>
+    </div>
+    </div>
 
     <!-- Réseaux sociaux -->
     <div id="reseaux-sociaux">
