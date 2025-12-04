@@ -86,88 +86,204 @@ let bonusCount = 0;
 let victoryJustTriggered = false;
 let gameOver = false;
 
-// compteurs pour l'historique d'affichage
+// Compteurs pour l'historique (labels affichés)
 let malusCount = 0;
 let bonusHistCount = 0;
+
+// Historique logique (pour sauvegarde)
+let historyEffects = [];
 
 // timer pour fermer le popup
 let malusTimeoutId = null;
 
 // ============================
-//   GESTION POOL (avec exceptions)
+//   SAUVEGARDE / REPRISE
 // ============================
 
-function initMalusPool() {
-  // Les deux malus qui ne doivent jamais tomber ensemble
-  const EXCLUSIVE_A = "Objets électroniques interdit";
-  const EXCLUSIVE_B = "Objets non électro. interdit";
+const STORAGE_PREFIX = "mort_pre_game_";
+const LAST_GAME_KEY = "mort_pre_last_game";
+let currentGameId = null;
 
-  // Mélange de tous les malus
-  const shuffledMalus = shuffle([...MALUS_LIST]);
+function createNewGameId() {
+  if (window.crypto && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return (
+    Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8)
+  );
+}
 
-  const chosenMalus = [];
-  let hasExclusiveAlready = false;
+function getGameIdFromUrl() {
+  const url = new URL(window.location.href);
+  return url.searchParams.get("g");
+}
 
-  // On construit une liste de 9 malus en respectant la règle d'exclusion
-  for (const text of shuffledMalus) {
-    if (chosenMalus.length >= 9) break;
+function setGameIdInUrl(id) {
+  const url = new URL(window.location.href);
+  url.searchParams.set("g", id);
+  window.history.replaceState(null, "", url.toString());
+}
 
-    if (text === EXCLUSIVE_A || text === EXCLUSIVE_B) {
-      if (hasExclusiveAlready) continue; // on a déjà l'un des deux
-      hasExclusiveAlready = true;
-      chosenMalus.push({ text, type: "malus" });
-    } else {
-      chosenMalus.push({ text, type: "malus" });
+function clearGameIdFromUrl() {
+  const url = new URL(window.location.href);
+  url.searchParams.delete("g");
+  window.history.replaceState(null, "", url.toString());
+}
+
+function clearSavedGame() {
+  if (currentGameId) {
+    localStorage.removeItem(STORAGE_PREFIX + currentGameId);
+  }
+  localStorage.removeItem(LAST_GAME_KEY);
+  clearGameIdFromUrl();
+  currentGameId = null;
+}
+
+function saveGameState() {
+  if (!currentGameId) return;
+  const table = document.getElementById("carte");
+  if (!table) return;
+
+  const cells = table.getElementsByTagName("td");
+  const gridImages = [];
+  const selectedIndices = [];
+
+  for (let i = 0; i < cells.length; i++) {
+    const cell = cells[i];
+    const img = cell.querySelector("img");
+    const isCenter = cell.dataset.center === "1";
+
+    let imgName = null;
+    if (img) {
+      // on récupère juste le nom du fichier (après le dernier /)
+      const parts = img.src.split("/");
+      imgName = parts[parts.length - 1];
+    }
+
+    gridImages.push({
+      name: imgName,
+      isCenter: isCenter,
+    });
+
+    if (cell.classList.contains("selected")) {
+      selectedIndices.push(i);
     }
   }
 
-  // Sécurité : compléter à 9 si besoin
-  if (chosenMalus.length < 9) {
-    for (const text of shuffledMalus) {
-      if (chosenMalus.length >= 9) break;
-      if (chosenMalus.some((e) => e.text === text)) continue;
+  const state = {
+    gridImages,
+    selectedIndices,
+    malusPool,
+    malusIndex,
+    malusShownCount,
+    bonusCount,
+    gameOver,
+    victoryJustTriggered,
+    historyEffects,
+  };
 
-      if (hasExclusiveAlready && (text === EXCLUSIVE_A || text === EXCLUSIVE_B)) {
-        continue;
+  localStorage.setItem(STORAGE_PREFIX + currentGameId, JSON.stringify(state));
+  localStorage.setItem(LAST_GAME_KEY, currentGameId);
+}
+
+function restoreGame(state) {
+  // --- restaurer les variables logiques ---
+  malusPool = state.malusPool || [];
+  malusIndex = state.malusIndex || 0;
+  malusShownCount = state.malusShownCount || 0;
+  bonusCount = state.bonusCount || 0;
+  gameOver = state.gameOver || false;
+  victoryJustTriggered = state.victoryJustTriggered || false;
+  historyEffects = state.historyEffects || [];
+
+  // --- reconstruire la grille ---
+  const table = document.getElementById("carte");
+  if (!table) return;
+  table.innerHTML = "";
+
+  const gridImages = state.gridImages || [];
+  const selectedSet = new Set(state.selectedIndices || []);
+
+  for (let i = 0; i < GRID_ROWS; i++) {
+    const row = table.insertRow(i);
+    for (let j = 0; j < GRID_COLS; j++) {
+      const cell = row.insertCell(j);
+      const index = i * GRID_COLS + j;
+      const cellInfo = gridImages[index] || {};
+      const img = document.createElement("img");
+
+      const isCenter = !!cellInfo.isCenter;
+      if (isCenter) {
+        img.src = imagesFolder + centerImage.name;
+        img.alt = "Image centre";
+        cell.dataset.center = "1";
+      } else {
+        // si pas de name stocké (sécurité), on tombe sur une image de base
+        const name =
+          cellInfo.name ||
+          (ListeImages[index] ? ListeImages[index].name : centerImage.name);
+        img.src = imagesFolder + name;
+        img.alt = "Image";
+
+        const genderClass = getGenderClass(name);
+        cell.classList.add(genderClass);
       }
 
-      chosenMalus.push({ text, type: "malus" });
+      const overlay = document.createElement("div");
+      overlay.className = "overlay";
+
+      const logo = document.createElement("img");
+      logo.src = imagesFolder + "Bingo_confirme.webp";
+      logo.alt = "Bingo_confirme";
+      logo.className = "logo";
+
+      overlay.appendChild(logo);
+      cell.appendChild(img);
+      cell.appendChild(overlay);
+
+      cell.classList.add("cell-appear");
+
+      if (!isCenter) {
+        cell.addEventListener("click", function () {
+          toggleSelected(this);
+        });
+      }
+
+      if (selectedSet.has(index) && !isCenter) {
+        cell.classList.add("selected");
+      }
     }
   }
 
-  // 1 bonus aléatoire
-  const bonusText = BONUS_LIST[Math.floor(Math.random() * BONUS_LIST.length)];
-  const bonusEntry = { text: bonusText, type: "bonus" };
-
-  // 9 malus + 1 bonus mélangés
-  malusPool = shuffle([...chosenMalus, bonusEntry]);
-
-  // Reset des états
-  malusIndex = 0;
-  malusShownCount = 0;
-  bonusCount = 0;
-  gameOver = false;
-  victoryJustTriggered = false;
-
-  malusCount = 0;
-  bonusHistCount = 0;
-
-  if (malusTimeoutId) {
-    clearTimeout(malusTimeoutId);
-    malusTimeoutId = null;
-  }
-
-  const box = document.getElementById("malus-message");
-  if (box) {
-    box.style.display = "none";
-    box.classList.remove("show", "effect-malus", "effect-bonus");
-  }
-
+  // --- reconstruire l'historique visuel ---
   const hist = document.getElementById("historique-malus");
   const list = document.getElementById("liste-malus");
   if (hist && list) {
-    hist.style.visibility = "hidden";  // on cache visuellement mais on garde la place
     list.innerHTML = "";
+    malusCount = 0;
+    bonusHistCount = 0;
+
+    historyEffects.forEach((eff) => {
+      const li = document.createElement("li");
+      if (eff.type === "bonus") {
+        bonusHistCount++;
+        li.textContent = `Bonus ${bonusHistCount} : ${eff.text}`;
+        li.classList.add("bonus");
+      } else {
+        malusCount++;
+        li.textContent = `Malus ${malusCount} : ${eff.text}`;
+        li.classList.add("malus");
+      }
+      list.appendChild(li);
+    });
+
+    hist.style.visibility = historyEffects.length ? "visible" : "hidden";
+  }
+
+  // logo réduit
+  const logoMort = document.getElementById("Logo_Mort_Pre");
+  if (logoMort) {
+    logoMort.classList.add("logo-small");
   }
 }
 
@@ -233,6 +349,9 @@ function addEffectToHistory(effect) {
 
   list.appendChild(li);
   hist.scrollTop = hist.scrollHeight;
+
+  // on garde aussi l'historique logique pour la sauvegarde
+  historyEffects.push({ type: effect.type, text: effect.text });
 }
 
 // ============================
@@ -268,6 +387,7 @@ function nettoyerGrilleApresVictoire() {
     list.innerHTML = "";
   }
 
+  clearSavedGame();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -317,6 +437,7 @@ function maybeAssignMalus(cell) {
     victoryJustTriggered = true;
     gameOver = true;
     showVictoryMessage();
+    saveGameState(); // sauvegarde finale avant reset (optionnel)
     return;
   }
 
@@ -334,6 +455,7 @@ function maybeAssignMalus(cell) {
 
   // popup + historique instantanés
   showMalusMessage(effect);
+  saveGameState();
 }
 
 // ============================
@@ -345,6 +467,12 @@ function genererNouvelleCarte() {
 
   const table = document.getElementById("carte");
   if (!table) return;
+
+  // nouvelle partie → on efface l'ancienne si elle existe
+  clearSavedGame();
+
+  currentGameId = createNewGameId();
+  setGameIdInUrl(currentGameId);
 
   initMalusPool();
   table.innerHTML = "";
@@ -364,6 +492,7 @@ function genererNouvelleCarte() {
       if (isCenter) {
         img.src = imagesFolder + centerImage.name;
         img.alt = "Image centre";
+        cell.dataset.center = "1";
       } else {
         const imageData = imagesMelangees[indexImage];
         img.src = imagesFolder + imageData.name;
@@ -403,6 +532,81 @@ function genererNouvelleCarte() {
   if (logoMort) {
     logoMort.classList.add("logo-small");
   }
+
+  // on sauvegarde l'état de départ
+  saveGameState();
+}
+
+// ============================
+//   INIT MALUS POOL (avec exclusions)
+// ============================
+
+function initMalusPool() {
+  const EXCLUSIVE_A = "Objets électroniques interdit";
+  const EXCLUSIVE_B = "Objets non électro. interdit";
+
+  const shuffledMalus = shuffle([...MALUS_LIST]);
+
+  const chosenMalus = [];
+  let hasExclusiveAlready = false;
+
+  for (const text of shuffledMalus) {
+    if (chosenMalus.length >= 9) break;
+
+    if (text === EXCLUSIVE_A || text === EXCLUSIVE_B) {
+      if (hasExclusiveAlready) continue;
+      hasExclusiveAlready = true;
+      chosenMalus.push({ text, type: "malus" });
+    } else {
+      chosenMalus.push({ text, type: "malus" });
+    }
+  }
+
+  if (chosenMalus.length < 9) {
+    for (const text of shuffledMalus) {
+      if (chosenMalus.length >= 9) break;
+      if (chosenMalus.some((e) => e.text === text)) continue;
+
+      if (hasExclusiveAlready && (text === EXCLUSIVE_A || text === EXCLUSIVE_B)) {
+        continue;
+      }
+
+      chosenMalus.push({ text, type: "malus" });
+    }
+  }
+
+  const bonusText = BONUS_LIST[Math.floor(Math.random() * BONUS_LIST.length)];
+  const bonusEntry = { text: bonusText, type: "bonus" };
+
+  malusPool = shuffle([...chosenMalus, bonusEntry]);
+
+  malusIndex = 0;
+  malusShownCount = 0;
+  bonusCount = 0;
+  gameOver = false;
+  victoryJustTriggered = false;
+
+  malusCount = 0;
+  bonusHistCount = 0;
+  historyEffects = [];
+
+  if (malusTimeoutId) {
+    clearTimeout(malusTimeoutId);
+    malusTimeoutId = null;
+  }
+
+  const box = document.getElementById("malus-message");
+  if (box) {
+    box.style.display = "none";
+    box.classList.remove("show", "effect-malus", "effect-bonus");
+  }
+
+  const hist = document.getElementById("historique-malus");
+  const list = document.getElementById("liste-malus");
+  if (hist && list) {
+    hist.style.visibility = "hidden";
+    list.innerHTML = "";
+  }
 }
 
 // ============================
@@ -425,15 +629,12 @@ function jouerCriFemme() {
 
 function toggleSelected(cell) {
   if (gameOver) return;
-
-  // une fois cochée, plus possible de la décocher
   if (cell.classList.contains("selected")) return;
 
   cell.classList.add("selected");
   console.log("Case selected");
   maybeAssignMalus(cell);
 
-  // Son selon homme/femme (sauf si victoire)
   if (!victoryJustTriggered) {
     if (cell.classList.contains("male")) {
       jouerCriHomme();
@@ -443,6 +644,8 @@ function toggleSelected(cell) {
   } else {
     victoryJustTriggered = false;
   }
+
+  saveGameState();
 }
 
 function jouerSonVictoire() {
@@ -474,5 +677,33 @@ function shuffle(array) {
 // ============================
 
 document.addEventListener("DOMContentLoaded", () => {
-  // On attend le clic sur "Générer une carte"
+  const urlGameId = getGameIdFromUrl();
+  let loaded = false;
+
+  if (urlGameId) {
+    const saved = localStorage.getItem(STORAGE_PREFIX + urlGameId);
+    if (saved) {
+      currentGameId = urlGameId;
+      const state = JSON.parse(saved);
+      restoreGame(state);
+      loaded = true;
+    }
+  }
+
+  // fallback : si pas de g= dans l’URL mais une partie en cours stockée
+  if (!loaded) {
+    const lastId = localStorage.getItem(LAST_GAME_KEY);
+    if (lastId) {
+      const saved = localStorage.getItem(STORAGE_PREFIX + lastId);
+      if (saved) {
+        currentGameId = lastId;
+        setGameIdInUrl(currentGameId);
+        const state = JSON.parse(saved);
+        restoreGame(state);
+        loaded = true;
+      }
+    }
+  }
+
+  // sinon, on attend que le joueur clique sur "Générer une carte"
 });
