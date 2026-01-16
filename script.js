@@ -73,7 +73,6 @@ const BONUS_LIST = [
   "Sprint illimité",
   "Vitesse joueur 150%",
   "Pas de malus",
-  "Vitesse entité 50%",
 ];
 
 const MAX_EFFECTS_PER_GRID = 10; // 9 malus + 1 bonus
