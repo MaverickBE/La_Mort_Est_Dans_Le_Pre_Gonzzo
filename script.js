@@ -57,7 +57,6 @@ const MALUS_LIST = [
   "EMF interdit",
   "Thermo interdit",
   "Objets électroniques interdit",
-  "Objets non électro. interdit",
   "Pas d'encens",
   "Pas de crucifix",
   "50% de santé mentale",
